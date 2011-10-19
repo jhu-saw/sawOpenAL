@@ -27,8 +27,10 @@ if (cisst_FOUND_AS_REQUIRED)
   include (${CISST_USE_FILE})
 
   add_library (sawOpenAL
+               ../osaOpenAL.h
                ../sawOpenAL.h
                ../sawOpenALExport.h
+               osaOpenAL.cpp
                mtsOpenALPlay.cpp
                ../mtsOpenALPlay.h
                mtsOpenALRecord.cpp
@@ -67,10 +69,10 @@ if (cisst_FOUND_AS_REQUIRED)
 
 
   # create/configure file for find_package (sawOpenAL)
-  set (sawOpenAL_INCLUDE_DIR "${sawComponents_SOURCE_DIR}" "${sawComponents_BINARY_DIR}" "${OPENAL_INCLUDE_DIR}")
+  set (sawOpenAL_INCLUDE_DIR "${sawComponents_SOURCE_DIR}" "${sawComponents_BINARY_DIR}" "${OPENAL_INCLUDE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
   set (sawOpenAL_LIBRARY_DIR "${LIBRARY_OUTPUT_PATH}")
   set (sawOpenAL_LIBRARIES sawOpenAL "${OPENAL_LIBRARY}")
-  set (sawOpenALQt_LIBRARIES sawOpenALQt)
+  set (sawOpenALQt_LIBRARIES ${sawOpenAL_LIBRARIES} sawOpenALQt)
 
   configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/sawOpenALConfig.cmake.in"
                   "${sawComponents_BINARY_DIR}/sawOpenALConfig.cmake"

@@ -44,16 +44,18 @@ public:
     void RecordStop();
     void PlayPause();
     void PlayStart(const std::string & filename);
+    std::string GetFileName(void) const;
 
     void SetCaptureDeviceName(const std::string & name);
     void SetCaptureDeviceID(unsigned int id);
-    void GetCaptureDeviceNames(mtsStdStringVec & names);
+    void GetCaptureDeviceNames(mtsStdStringVec & names) const;
 
 private:
 
     struct {
         mtsFunctionRead     GetIsRecording;
         mtsFunctionWrite    SetFileName;
+        mtsFunctionRead     GetFileName;
         mtsFunctionVoid     Start;
         mtsFunctionVoid     Stop;
         mtsFunctionWrite    SetCaptureDeviceName;

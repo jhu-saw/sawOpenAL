@@ -81,12 +81,13 @@ mtsOpenALRecord::mtsOpenALRecord(const std::string & taskName, double period, in
         StateTable.AddData(FileSize,    "FileSize");
 
         provided->AddCommandReadState(StateTable, IsRecording,      "GetIsRecording");
-        provided->AddCommandReadState(StateTable, StreamVolume,        "GetStreamVolume");
+        provided->AddCommandReadState(StateTable, StreamVolume,      "GetStreamVolume");
         provided->AddCommandReadState(StateTable, Time,             "GetTime");
         provided->AddCommandReadState(StateTable, FileSize,         "GetFileSize");
 
         // provided->AddCommandWriteState(StateTable, FileName,     "SetFileName");
         provided->AddCommandWrite(&mtsOpenALRecord::SetFileName,  this, "SetFileName", mtsStdString());
+        provided->AddCommandRead(&mtsOpenALRecord::GetFileName,  this, "GetFileName", mtsStdString());
         provided->AddCommandVoid(&mtsOpenALRecord::Record, this,    "Start");
         provided->AddCommandVoid(&mtsOpenALRecord::Stop,   this,    "Stop");
         provided->AddCommandWrite(&mtsOpenALRecord::SetCaptureDeviceName, this,    "SetCaptureDeviceName", mtsStdString());
@@ -260,9 +261,9 @@ void mtsOpenALRecord::Record(void)
                 WAVHeader->wfex.nAvgBytesPerSec = WAVHeader->wfex.nSamplesPerSec * WAVHeader->wfex.nBlockAlign;
                 WAVHeader->wfex.cbSize = 0;
 
-                sprintf(WAVHeader->szTime, "abTM");
-                WAVHeader->lTimeSize = 8;
-                WAVHeader->timeStamp = StartTime.Data;
+//                sprintf(WAVHeader->szTime, "abTM");
+//                WAVHeader->lTimeSize = 8;
+//                WAVHeader->timeStamp = StartTime.Data;
 
                 sprintf(WAVHeader->szData, "data");
                 WAVHeader->lDataSize = 0;
@@ -340,6 +341,16 @@ void mtsOpenALRecord::SetFileName(const mtsStdString & fileName)
 
     Time = 0;
 }
+
+void mtsOpenALRecord::GetFileName(mtsStdString & fileName) const
+{
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "GetFileName: " << fileName.Data << std::endl;
+
+    fileName = FileName;
+
+}
+
 
 
 void mtsOpenALRecord::GetCaptureDeviceNames(mtsStdStringVec & names) const

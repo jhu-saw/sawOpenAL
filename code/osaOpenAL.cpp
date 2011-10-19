@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id$
+  $Id: osaOpenAL.cpp 3069 2011-10-18 14:25:14Z adeguet1 $
 
   Author(s):  Marcin Balicki
   Created on: 2011
@@ -20,7 +20,7 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <sawOpenAL/mtsOpenALPlay.h>
+#include <sawOpenAL/osaOpenAL.h>
 #include "osaOpenALAudioTypes.h"
 
 #include <cisstMultiTask/mtsInterfaceProvided.h>
@@ -30,12 +30,11 @@ http://www.cisst.org/cisst/license.txt.
 #include <iomanip>
 #include <fstream>
 
-
 // required to implement the class services, see cisstCommon
-CMN_IMPLEMENT_SERVICES(mtsOpenALPlay);
+CMN_IMPLEMENT_SERVICES(osaOpenAL);
 
-mtsOpenALPlay::mtsOpenALPlay(const std::string & taskName, double period):
-    mtsTaskPeriodic(taskName, period, false, 5000)
+osaOpenAL::osaOpenAL():
+    cmnGenericObject()
 {
     SoundSettings = new osaOpenALCAIHeader;
     CAIHeader = new osaOpenALCAIHeader;
@@ -43,7 +42,7 @@ mtsOpenALPlay::mtsOpenALPlay(const std::string & taskName, double period):
 
     SoundFile = 0;
     FileName =  "";
-    FType = mtsOpenALPlay::CAI;
+    FType = osaOpenAL::CAI;
     StartTimeAbsolute = 0;
     Volume = 50;
     Time = 0;
@@ -52,42 +51,11 @@ mtsOpenALPlay::mtsOpenALPlay(const std::string & taskName, double period):
 
     Data = 0;
 
-    if (!InitOpenAL()) {
-        CMN_LOG_CLASS_INIT_ERROR << "Failed to initialize OpenAL" << std::endl;
-    }
-
-    mtsInterfaceProvided * provided = AddInterfaceProvided("ProvidesAudioPlayer");
-    if (provided) {
-        StateTable.AddData(IsPlaying,   "IsPlaying");
-        StateTable.AddData(StartTimeAbsolute,   "StartTime");
-        StateTable.AddData(FileName,    "FileName");
-        StateTable.AddData(Volume,      "Volume");
-        StateTable.AddData(Time,        "Time");
-        StateTable.AddData(LengthInSec, "LengthInSec");
-        StateTable.AddData(StreamVolume,   "StreamVolume");
-        StreamVolume.SetAutomaticTimestamp(false);
-
-        provided->AddCommandReadState(StateTable, IsPlaying,        "GetIsPlaying");
-        provided->AddCommandReadState(StateTable, Volume,           "GetVolume");
-        provided->AddCommandReadState(StateTable, Time,             "GetTime");
-        provided->AddCommandReadState(StateTable, LengthInSec,      "GetLengthInSec");
-
-        provided->AddCommandReadState(StateTable, StreamVolume,        "GetStreamVolume");
-
-        provided->AddCommandWrite(&mtsOpenALPlay::SetVolume,this,   "SetVolume", mtsDouble());
-        provided->AddCommandVoid(&mtsOpenALPlay::Play,      this,   "Play");
-        provided->AddCommandVoid(&mtsOpenALPlay::Pause,     this,   "Pause");
-        provided->AddCommandWrite(&mtsOpenALPlay::Seek,     this,   "Seek",     mtsDouble());
-        provided->AddCommandWrite(&mtsOpenALPlay::OpenFile, this,   "OpenFile", mtsStdString());
-
-        provided->AddEventVoid(RangeChangedEvent, "RangeChangedEvent");
-        provided->AddCommandReadState(StateTable, StartTimeAbsolute,        "GetStartTime");
-    }
     TimeServer = &mtsTaskManager::GetInstance()->GetTimeServer();
 }
 
 
-mtsOpenALPlay::~mtsOpenALPlay()
+osaOpenAL::~osaOpenAL()
 {
     delete SoundSettings;
     SoundSettings = 0;
@@ -113,17 +81,20 @@ mtsOpenALPlay::~mtsOpenALPlay()
 }
 
 
-void mtsOpenALPlay::Startup(void)
+void osaOpenAL::Startup(void)
 {
-    CMN_LOG_CLASS_RUN_VERBOSE << "mtsOpenALPlay starting ..." << std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "osaOpenAL starting ..." << std::endl;
+    if (!InitOpenAL()) {
+        CMN_LOG_CLASS_INIT_ERROR << "Failed to initialize OpenAL" << std::endl;
+    }
+
 }
 
 
-void mtsOpenALPlay::Run(void)
+void osaOpenAL::Run(void)
 {
-    ProcessQueuedCommands();
 
-    ALint iState;
+    ALint iState = 0;
 
     if (SoundFile) {
 
@@ -151,7 +122,7 @@ void mtsOpenALPlay::Run(void)
 }
 
 
-void mtsOpenALPlay::Pause(void)
+void osaOpenAL::Pause(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "Pause called" << std::endl;
     if (IsPlaying && (SoundFile)){
@@ -161,15 +132,16 @@ void mtsOpenALPlay::Pause(void)
 }
 
 
-void mtsOpenALPlay::Seek(const mtsDouble & time)
+void osaOpenAL::Seek(const mtsDouble & time)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "Seek called for " << time.Data <<std::endl;
 
     if (SoundFile) {
+        bool tmpWasPlaying = IsPlaying;
         double alTime = time - StartTimeAbsolute;
 
-        if (FType == mtsOpenALPlay::CAI
-                || FType == mtsOpenALPlay::WAV) {
+        if (FType == osaOpenAL::CAI
+                || FType == osaOpenAL::WAV) {
 
             if (alTime > LengthInSec) {
                 CMN_LOG_CLASS_RUN_VERBOSE << "Seek reached the end (" << StartTimeAbsolute + LengthInSec
@@ -194,7 +166,7 @@ void mtsOpenALPlay::Seek(const mtsDouble & time)
 }
 
 
-void mtsOpenALPlay::Play(void)
+void osaOpenAL::Play(void)
 {
     if (!IsPlaying && (SoundFile)) {
         alSourcef(SoundSource[0], AL_GAIN, Volume.Data);
@@ -211,7 +183,7 @@ void mtsOpenALPlay::Play(void)
 }
 
 
-void mtsOpenALPlay::Stop(void)
+void osaOpenAL::Stop(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "Stop called" << std::endl;
 
@@ -225,7 +197,7 @@ void mtsOpenALPlay::Stop(void)
 }
 
 
-void mtsOpenALPlay::OpenFile(const mtsStdString & fName)
+void osaOpenAL::OpenFile(const mtsStdString & fName)
 {
     Stop();
 
@@ -254,7 +226,7 @@ void mtsOpenALPlay::OpenFile(const mtsStdString & fName)
         // using CAI format
         if (FileName.Data.substr(pos + 1) == "cai") {
             CMN_LOG_CLASS_RUN_VERBOSE << "FileOpen: opening CAI file "<< FileName.Data << std::endl;
-            FType = mtsOpenALPlay::CAI;
+            FType = osaOpenAL::CAI;
 
             if (::fread(CAIHeader, 1, sizeof(osaOpenALCAIHeader), SoundFile)) {
                 unsigned int tmpCurrent = ftell(SoundFile);
@@ -320,7 +292,7 @@ void mtsOpenALPlay::OpenFile(const mtsStdString & fName)
         // WAV format
         else if (FileName.Data.substr(pos+1) == "wav") {
             CMN_LOG_CLASS_RUN_VERBOSE << "FileOpen: opening WAV file " << FileName.Data << std::endl;
-            FType = mtsOpenALPlay::WAV;
+            FType = osaOpenAL::WAV;
 
             //! \todo at the moment we can't read other wav files. To fix, look for tags first.
             if (::fread(WAVHeader, 1, sizeof(osaOpenALWAVHeader), SoundFile)) {
@@ -373,7 +345,7 @@ void mtsOpenALPlay::OpenFile(const mtsStdString & fName)
                     }
                 }
 
-                //Open text file containing the data timestamps:
+                //Open text file containing the datatimestamps:
                 std::string headerLine;
                 std::string timeStampFileName = FileName.Data + std::string(".txt");
                 std::ifstream timeStampFile(timeStampFileName.c_str());
@@ -424,7 +396,7 @@ void mtsOpenALPlay::OpenFile(const mtsStdString & fName)
 }
 
 
-std::string mtsOpenALPlay::GetALErrorString(ALenum err)
+std::string osaOpenAL::GetALErrorString(ALenum err)
 {
     switch(err)
     {
@@ -454,10 +426,11 @@ std::string mtsOpenALPlay::GetALErrorString(ALenum err)
     default:
         return std::string("NO_ERROR");
     };
+
 }
 
 
-bool mtsOpenALPlay::CheckALError(std::string & error)
+bool osaOpenAL::CheckALError(std::string & error)
 {
     ALenum result;
 
@@ -471,7 +444,7 @@ bool mtsOpenALPlay::CheckALError(std::string & error)
 }
 
 
-void mtsOpenALPlay::SetVolume(const mtsDouble & volume)
+void osaOpenAL::SetVolume(const mtsDouble & volume)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "SetVolume: called with " << volume.Data << std::endl;
     if (volume > 1.0)
@@ -485,7 +458,7 @@ void mtsOpenALPlay::SetVolume(const mtsDouble & volume)
 }
 
 
-bool mtsOpenALPlay::InitOpenAL(void)
+bool osaOpenAL::InitOpenAL(void)
 {
     Device = alcOpenDevice(NULL);
     if (Device == NULL) {
@@ -522,7 +495,7 @@ bool mtsOpenALPlay::InitOpenAL(void)
 }
 
 
-bool mtsOpenALPlay::CloseOpenAL(void)
+bool osaOpenAL::CloseOpenAL(void)
 {
     if (Device) {
         if (Context) {
@@ -546,7 +519,7 @@ bool mtsOpenALPlay::CloseOpenAL(void)
 
 
 //! \todo extend to other data taypes.
-double mtsOpenALPlay::CalcStreamVolume(int samplePos)
+double osaOpenAL::CalcStreamVolume(int samplePos)
 {
 
     int numberOfSamples = 1; //this is in case we want to check a sequence of samples.
@@ -583,13 +556,24 @@ double mtsOpenALPlay::CalcStreamVolume(int samplePos)
 }
 
 
-double mtsOpenALPlay::CalcStreamTime(int samplePos)
+double osaOpenAL::CalcStreamTime(int samplePos)
 {
     return (double)samplePos/(double)SoundSettings->frequency;
 }
 
 
-int mtsOpenALPlay::CalcStreamPos(double time)
+int osaOpenAL::CalcStreamPos(double time)
 {
     return (int) (SoundSettings->frequency * time) ;
+}
+
+double osaOpenAL::GetStartTime() {
+    return StartTimeAbsolute;
+
+}
+
+double osaOpenAL::GetEndTime() {
+
+    return StartTimeAbsolute + LengthInSec;
+
 }

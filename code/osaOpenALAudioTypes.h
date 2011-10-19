@@ -52,9 +52,10 @@ struct osaOpenALWAVHeader
     char            szFmt[4];
     ALuint          lFmtSize;
     WAVEFORMATEX    wfex;
-    char            szTime[4];  //name of the subchunk - "abTM" - so it does not clash with other times
-    ALuint          lTimeSize;  //size of the subchunk - 8
-    double          timeStamp;  //absolute start time
+   //removed in favor of a seperate text file, ensures compatibility with standard wav files.
+   // char            szTime[4];  //name of the subchunk - "abTM" - so it does not clash with other times
+   // ALuint          lTimeSize;  //size of the subchunk - 8
+   // double          timeStamp;  //absolute start time
     char            szData[4];
     ALuint          lDataSize;
 };

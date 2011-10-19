@@ -109,6 +109,8 @@ public:
     // all four methods are pure virtual in mtsTask
     void Configure(const std::string & CMN_UNUSED(filename)) {};
     void SetFileName(const mtsStdString &fileName);
+    void GetFileName(mtsStdString &fileName) const;
+
     void Startup(void);    // set some initial values
     void Run(void);        // performed periodically
     void Cleanup(void) {}; // user defined cleanup

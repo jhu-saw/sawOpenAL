@@ -54,6 +54,8 @@ void mtsOpenALTestComponent::CreateInterfaces(void)
         required->AddFunction("Start",          Recorder.Start);
         required->AddFunction("Stop",           Recorder.Stop);
         required->AddFunction("SetFileName",    Recorder.SetFileName);
+        required->AddFunction("GetFileName",    Recorder.GetFileName);
+
         required->AddFunction("SetCaptureDeviceName",   Recorder.SetCaptureDeviceName);
         required->AddFunction("SetCaptureDeviceID",     Recorder.SetCaptureDeviceID);
         required->AddFunction("GetCaptureDeviceNames",  Recorder.GetCaptureDeviceNames);
@@ -121,11 +123,19 @@ void mtsOpenALTestComponent::SetCaptureDeviceID(unsigned int id)
 }
 
 
-void mtsOpenALTestComponent::GetCaptureDeviceNames(mtsStdStringVec & names)
+void mtsOpenALTestComponent::GetCaptureDeviceNames(mtsStdStringVec & names) const
 {
     Recorder.GetCaptureDeviceNames(names);
     CMN_LOG_CLASS_RUN_VERBOSE << names.size() << " capture device names are: " <<std::endl;
     for (unsigned int i = 0; i< names.size(); i ++) {
         CMN_LOG_CLASS_RUN_VERBOSE << i << ": " << names[i] << std::endl;
     }
+}
+
+std::string mtsOpenALTestComponent::GetFileName(void) const {
+
+     mtsStdString name;
+     Recorder.GetFileName(name);
+     return name.Data;
+
 }

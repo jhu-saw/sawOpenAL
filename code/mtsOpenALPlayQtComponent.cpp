@@ -50,9 +50,9 @@ mtsOpenALPlayQtComponent::mtsOpenALPlayQtComponent(const std::string & name, dou
 
     PlayWidget.MainVLayout->addWidget(Plot);
 
-    // adeguet1 SeekSlider  = new QwtSlider(&Widget, Qt::Horizontal, QwtSlider::BottomScale, QwtSlider::BgBoth);
+    SeekSlider  = new QSlider( Qt::Horizontal, &Widget);
 
-    // adeguet1 PlayWidget.SliderVLayout->addWidget(SeekSlider);
+    PlayWidget.SliderVLayout->addWidget(SeekSlider);
 
     TimeServer = mtsTaskManager::GetInstance()->GetTimeServer();
 
@@ -90,11 +90,9 @@ void mtsOpenALPlayQtComponent::MakeQTConnections(void)
     QObject::connect(PlayWidget.VolumeSlider, SIGNAL(sliderMoved(int)),
                      this, SLOT(QSlotVolumeSliderMoved(int)));
 
-    // adeguet1
-#if 0
+
     QObject::connect(this->SeekSlider, SIGNAL(sliderMoved(double)),
                      this, SLOT(QSlotSeekSliderMoved(double)));
-#endif
 
     QObject::connect(this, SIGNAL(QSignalUpdateRange()),
                      this, SLOT(QSlotUpdateRange()));
@@ -152,7 +150,7 @@ void mtsOpenALPlayQtComponent::timerEvent(QTimerEvent * event)
     mtsDouble t;
     Player.GetTime(t);
     PlayWidget.TimeLabel->setText(QString::number(t.Data, 'f', 3));
-    // adeguet1 SeekSlider->setValue(t.Data - DataStartTime);
+    SeekSlider->setValue(int(t.Data - DataStartTime));
 }
 
 
@@ -191,6 +189,6 @@ void mtsOpenALPlayQtComponent::QSlotUpdateRange()
     Player.GetStartTime(DataStartTime);
     Player.GetLengthInSec(tLength);
     DataEndTime = DataStartTime + tLength;
-    // adeguet1 SeekSlider->setRange(0, DataEndTime - DataStartTime, 0, 1);
+    SeekSlider->setRange(0, (int) (DataEndTime - DataStartTime));
 }
 

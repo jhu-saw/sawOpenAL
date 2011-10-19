@@ -14,69 +14,38 @@
 
 cmake_minimum_required (VERSION 2.8)
 
-find_package (cisst REQUIRED NO_MODULE)
+# create a list of libraries needed for this project
+set (REQUIRED_CISST_LIBRARIES cisstCommon cisstVector cisstOSAbstraction
+                              cisstMultiTask cisstParameterTypes
+			      cisstVectorQt cisstQt)
 
-IF(cisst_FOUND)
+# find cisst and make sure the required libraries have been compiled
+find_package (cisst REQUIRED ${REQUIRED_CISST_LIBRARIES})
 
-    # Modify CMake configuration to use cisst
-    include (${CISST_USE_FILE})
+if (cisst_FOUND)
 
-    ADD_EXECUTABLE(${PROJECT_NAME}Test
-               # code files to compile
-               main.cpp
-               mtsOpenALTestComponent.h
-               mtsOpenALTestComponent.cpp
-	       )
-		   # this program
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}Test
-			${cisstAudio_INCLUDE_LIBS}
-			)
+  # load cisst configuration
+  include (${CISST_USE_FILE})
 
-    CISST_REQUIRES("${PROJECT_NAME}Test" "cisstCommon;cisstVector;cisstOSAbstraction;cisstMultiTask")
+  # sawOpenAL has been compiled within cisst, we should find it automatically
+  find_package (sawOpenAL REQUIRED HINTS "${CISST_BINARY_DIR}/saw/components")
 
+  if (sawOpenAL_FOUND)
 
-    SET (QT_USE_QTOPENGL 1)
+    # sawOpenAL configuration
+    include_directories (${sawOpenAL_INCLUDE_DIR})
+    link_directories (${sawOpenAL_LIBRARY_DIR})
+    
+    add_executable (sawOpenALExampleQt
+                    main.cpp)
+            
+    # link against non cisst libraries and saw components
+    target_link_libraries (sawOpenALExampleQt
+                           ${sawOpenALQt_LIBRARIES}
+                          )
+    # link against cisst libraries (and dependencies)
+    cisst_target_link_libraries (sawOpenALExampleQt ${REQUIRED_CISST_LIBRARIES})
 
-    find_package(Qt4 REQUIRED)
-    include(${QT_USE_FILE})
+  endif (sawOpenAL_FOUND)
 
-
-    qt4_wrap_cpp(QT_WRAPPED_CPP
-                 mtsOpenALRecordQtComponent.h
-                 mtsOpenALPlayQtComponent.h
-                 )
-
-    qt4_wrap_ui(QT_WRAPPED_UI
-                mtsOpenALPlayQtWidget.ui
-                mtsOpenALRecordQtWidget.ui
-                )
-
-    INCLUDE(../../cmake/FindQwt5.cmake)
-
-    INCLUDE_DIRECTORIES( ${Qwt5_INCLUDE_DIR} )
-
-    ADD_EXECUTABLE(${PROJECT_NAME}GUI
-               # code files to compile
-               mainGUI.cpp
-               mtsOpenALRecordQtComponent.h
-               mtsOpenALRecordQtComponent.cpp
-               mtsOpenALPlayQtComponent.h
-               mtsOpenALPlayQtComponent.cpp
-               ${QT_WRAPPED_CPP}
-               ${QT_WRAPPED_UI}
-
-           )
-           # this program
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}GUI
-            ${cisstAudio_INCLUDE_LIBS}
-            ${QT_LIBRARIES}
-            ${Qwt5_Qt4_TENTATIVE_LIBRARY}
-            )
-
-    CISST_REQUIRES("${PROJECT_NAME}GUI" "cisstCommon;cisstVector;cisstVectorQt;cisstOSAbstraction;cisstMultiTask")
-
-
-
-    ADD_DEFINITIONS(-DWIN32_LEAN_AND_MEAN)
-
-ENDIF(cisst_FOUND)
+endif (cisst_FOUND)

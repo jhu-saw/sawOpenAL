@@ -65,24 +65,28 @@ int main(int argc, char *argv[])
     mtsStdStringVec names;
     tester->GetCaptureDeviceNames(names);
 
-    int ch = 0;
-    ch = cmnGetChar();
-    int i = atoi((char *) (&ch));
+//    int ch = 0;
+//    ch = cmnGetChar();
+//    int i = atoi((char *) (&ch));
+    tester->SetCaptureDeviceID(0);
 
-    tester->SetCaptureDeviceID(i);
-
-    std::string testFile("test.cai");
+    std::string testFile("test.wav");
     tester->RecordStart(testFile);
 
-    std::cout << "Currently recording, press any key to stop" << std::endl;
 
-    ch = cmnGetChar();
+    std::cout << "Recording" << std::endl;
+
+    osaSleep(5 * cmn_s);
+
     tester->RecordStop();
-    osaSleep(1.0 * cmn_s);
-    tester->PlayStart(testFile);
 
-    std::cout << "Press any key to stop replay" << std::endl;
-    ch = cmnGetChar();
+    osaSleep(1.0 * cmn_s);
+    tester->PlayStart( tester->GetFileName());
+
+    std::cout << "Playing" << std::endl;
+
+
+    osaSleep(6.0 * cmn_s);
     tester->PlayPause();
 
     // kill all components and perform cleanup

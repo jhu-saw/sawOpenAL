@@ -26,14 +26,13 @@ http://www.cisst.org/cisst/license.txt.
 #include <QDockWidget>
 #include <QTimerEvent>
 #include <QErrorMessage>
+#include <QSlider>
 
 #include <cisstVector/vctPlot2DOpenGLQtWidget.h>
 #include <cisstOSAbstraction/osaTimeServer.h>
 #include <cisstMultiTask/mtsComponent.h>
 
 #include "ui_mtsOpenALPlayQtWidget.h"
-
-// adeguet1 #include <qwt_slider.h>
 
 // Always include last!
 #include <sawOpenAL/sawOpenALExportQt.h>
@@ -65,7 +64,7 @@ class CISST_EXPORT mtsOpenALPlayQtComponent: public QObject, public mtsComponent
  private:
     //The instance of the widget representing this behavior.
     QDockWidget         Widget;
-    // adeguet1 QwtSlider          *SeekSlider;
+    QSlider             *SeekSlider;
 
 
     Ui::mtsOpenALPlayQtWidget PlayWidget;
