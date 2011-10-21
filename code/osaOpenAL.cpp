@@ -214,6 +214,9 @@ void osaOpenAL::OpenFile(const mtsStdString & fName)
         SoundFile = 0;
     }
 
+    double startTime = 0;
+    double bytesPerWholeSample = 0;
+
     FileName = fName.Data;
     int pos = FileName.Data.find_last_of('.');
     if (pos == std::string::npos
@@ -221,180 +224,211 @@ void osaOpenAL::OpenFile(const mtsStdString & fName)
             || (SoundFile = ::fopen(FileName.Data.c_str(), "rb")) == 0 ) {
         CMN_LOG_CLASS_RUN_ERROR << "OpenFile: file name is not valid: " << FileName.Data << std::endl;
         Time = 0;
-    } else {
+        return;
+    }
 
-        // using CAI format
-        if (FileName.Data.substr(pos + 1) == "cai") {
-            CMN_LOG_CLASS_RUN_VERBOSE << "FileOpen: opening CAI file "<< FileName.Data << std::endl;
-            FType = osaOpenAL::CAI;
+    // using CAI format
+    if (FileName.Data.substr(pos + 1) == "cai") {
+        CMN_LOG_CLASS_RUN_VERBOSE << "FileOpen: opening CAI file "<< FileName.Data << std::endl;
+        FType = osaOpenAL::CAI;
 
-            if (::fread(CAIHeader, 1, sizeof(osaOpenALCAIHeader), SoundFile)) {
-                unsigned int tmpCurrent = ftell(SoundFile);
+        if (::fread(CAIHeader, 1, sizeof(osaOpenALCAIHeader), SoundFile)) {
+            unsigned int tmpCurrent = ftell(SoundFile);
 
-                fseek(SoundFile, 0, SEEK_END);
-                NumDataBytes = ftell(SoundFile) - tmpCurrent;
-                fseek(SoundFile, tmpCurrent, SEEK_SET);
-                //this is the whole file in memory.
+            fseek(SoundFile, 0, SEEK_END);
+            NumDataBytes = ftell(SoundFile) - tmpCurrent;
+            fseek(SoundFile, tmpCurrent, SEEK_SET);
+            //this is the whole file in memory.
 
-                double bytesPerWholeSample =  CAIHeader->nBytesPerSample * CAIHeader->nChannels;
+            double bytesPerWholeSample =  CAIHeader->nBytesPerSample * CAIHeader->nChannels;
 
-                LengthInSec = (double)NumDataBytes / bytesPerWholeSample  / (double)CAIHeader->frequency;
-                CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: file length is : "
-                                          << LengthInSec.Data << " seconds" << std::endl;
+            LengthInSec = (double)NumDataBytes / bytesPerWholeSample  / (double)CAIHeader->frequency;
+            CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: file length is : "
+                                      << LengthInSec.Data << " seconds" << std::endl;
 
-                StartTimeAbsolute = CAIHeader->StartTime;
-                CMN_LOG_CLASS_RUN_VERBOSE << std::setprecision(3) << std::fixed
-                                          <<"OpenFile: absolute start time: " << StartTimeAbsolute.Data << std::endl;
+            StartTimeAbsolute = CAIHeader->StartTime;
+            CMN_LOG_CLASS_RUN_VERBOSE << std::setprecision(3) << std::fixed
+                                      <<"OpenFile: absolute start time: " << StartTimeAbsolute.Data << std::endl;
 
-                Data = new char[NumDataBytes];
+            Data = new char[NumDataBytes];
 
-                ::fread(Data, 1, NumDataBytes, SoundFile);
+            ::fread(Data, 1, NumDataBytes, SoundFile);
 
-                ALenum tmpFormat;
+            ALenum tmpFormat;
 
-                if (CAIHeader->nChannels == 1) {
-                    if (CAIHeader->nBytesPerSample == 1) {
-                        tmpFormat = AL_FORMAT_MONO8;
-                    } else {
-                        tmpFormat = AL_FORMAT_MONO16;
-                    }
+            if (CAIHeader->nChannels == 1) {
+                if (CAIHeader->nBytesPerSample == 1) {
+                    tmpFormat = AL_FORMAT_MONO8;
                 } else {
-                    if (CAIHeader->nBytesPerSample == 1) {
-                        tmpFormat = AL_FORMAT_STEREO8;
-                    } else {
-                        tmpFormat = AL_FORMAT_STEREO16;
-                    }
+                    tmpFormat = AL_FORMAT_MONO16;
                 }
-
-                *SoundSettings = *CAIHeader;
-
-                alGetError();
-                alGenBuffers(1, SoundBuffer);
-                std::string err;
-                if (CheckALError(err)) {
-                    CMN_LOG_CLASS_RUN_ERROR << "OpenFile: OpenAL error: " << err
-                                            <<" - while generating data BUFFER" << std::endl;
+            } else {
+                if (CAIHeader->nBytesPerSample == 1) {
+                    tmpFormat = AL_FORMAT_STEREO8;
+                } else {
+                    tmpFormat = AL_FORMAT_STEREO16;
                 }
-                alBufferData(SoundBuffer[0], tmpFormat, Data, NumDataBytes, CAIHeader->frequency);
-                alGenSources(1, SoundSource);
-
-                if (CheckALError(err)) {
-                    CMN_LOG_CLASS_RUN_ERROR << "OpenFile: OpenAL error: " << err
-                                            << "- while creating data buffer and SOURCES" << std::endl;
-                }
-
-                alSourcei(SoundSource[0], AL_BUFFER, SoundBuffer[0]);
             }
 
-            Seek(0);
-            RangeChangedEvent();
+            *SoundSettings = *CAIHeader;
+
+            alGetError();
+            alGenBuffers(1, SoundBuffer);
+            std::string err;
+            if (CheckALError(err)) {
+                CMN_LOG_CLASS_RUN_ERROR << "OpenFile: OpenAL error: " << err
+                                        <<" - while generating data BUFFER" << std::endl;
+            }
+            alBufferData(SoundBuffer[0], tmpFormat, Data, NumDataBytes, CAIHeader->frequency);
+            alGenSources(1, SoundSource);
+
+            if (CheckALError(err)) {
+                CMN_LOG_CLASS_RUN_ERROR << "OpenFile: OpenAL error: " << err
+                                        << "- while creating data buffer and SOURCES" << std::endl;
+            }
+
+            alSourcei(SoundSource[0], AL_BUFFER, SoundBuffer[0]);
         }
-        // WAV format
-        else if (FileName.Data.substr(pos+1) == "wav") {
-            CMN_LOG_CLASS_RUN_VERBOSE << "FileOpen: opening WAV file " << FileName.Data << std::endl;
-            FType = osaOpenAL::WAV;
 
-            //! \todo at the moment we can't read other wav files. To fix, look for tags first.
-            if (::fread(WAVHeader, 1, sizeof(osaOpenALWAVHeader), SoundFile)) {
+        Seek(0);
+        RangeChangedEvent();
+    }
+    // WAV format
+    else if (FileName.Data.substr(pos+1) == "wav") {
+        CMN_LOG_CLASS_RUN_VERBOSE << "FileOpen: opening WAV file " << FileName.Data << std::endl;
+        FType = osaOpenAL::WAV;
 
-                unsigned int tmpCurrent = ftell(SoundFile);
+        //! \todo at the moment we can't read other wav files. To fix, look for tags first.
+        //Test if we are using the old waveheader
 
-                fseek(SoundFile, 0, SEEK_END);
-                NumDataBytes = ftell(SoundFile) - tmpCurrent;
-                fseek(SoundFile, tmpCurrent, SEEK_SET);
-                //this is the whole file in memory.
+        osaOpenALCISSTWAVHeader  cisstWAVHeader;
 
-                if (WAVHeader->wfex.wFormatTag != 1) {
-                    CMN_LOG_CLASS_RUN_ERROR << "OpenFile: wrong WAV format for file: " << FileName.Data << std::endl;
-                }
+        ::fread(&cisstWAVHeader, 1, sizeof(osaOpenALCISSTWAVHeader), SoundFile);
 
-                SoundSettings->nBytesPerSample   = WAVHeader->wfex.wBitsPerSample / 8;
-                SoundSettings->nChannels         = WAVHeader->wfex.nChannels;
-                SoundSettings->frequency         = WAVHeader->wfex.nSamplesPerSec;
+        if (strcmp(cisstWAVHeader.szTime, "abTM") == 0) {
 
-                double bytesPerWholeSample =  WAVHeader->wfex.nBlockAlign;  // WAV_Header->wfex.nChannels * WAV_Header->wfex.wBitsPerSample / 8
+            CMN_LOG_CLASS_RUN_WARNING << "Using old wav file version" <<std::endl;
+            unsigned int tmpCurrent = ftell(SoundFile);
 
-                LengthInSec = (double)NumDataBytes / bytesPerWholeSample  / (double) SoundSettings->frequency;
+            fseek(SoundFile, 0, SEEK_END);
+            NumDataBytes = ftell(SoundFile) - tmpCurrent;
+            fseek(SoundFile, tmpCurrent, SEEK_SET);
+            //this is the whole file in memory.
 
-                CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: file length is: "
-                                          << LengthInSec.Data << " seconds" << std::endl;
-
-                Data = new char[NumDataBytes];
-
-                ::fread(Data, 1, NumDataBytes, SoundFile);
-
-                CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: audioData size is: " << NumDataBytes
-                                          << " bytes; WAV header reports Data Size: " << WAVHeader->lDataSize
-                                          << " bytes" << std::endl;
-
-                ALenum tmpFormat;
-
-                if (SoundSettings->nChannels == 1) {
-                    if (SoundSettings->nBytesPerSample == 1) {
-                        tmpFormat = AL_FORMAT_MONO8;
-                    } else {
-                        tmpFormat = AL_FORMAT_MONO16;
-                    }
-                }
-                else {
-                    if (SoundSettings->nBytesPerSample == 1) {
-                        tmpFormat = AL_FORMAT_STEREO8;
-                    }
-                    else {
-                        tmpFormat = AL_FORMAT_STEREO16;
-                    }
-                }
-
-                //Open text file containing the datatimestamps:
-                std::string headerLine;
-                std::string timeStampFileName = FileName.Data + std::string(".txt");
-                std::ifstream timeStampFile(timeStampFileName.c_str());
-                double startTime = 0;
-                if (timeStampFile.is_open())
-                {
-                    getline (timeStampFile,headerLine);
-                    timeStampFile>>startTime;
-                }
-                else {
-                    CMN_LOG_CLASS_RUN_ERROR << "Can't Open file: " << timeStampFileName <<std::endl;
-                    return ;
-                }
-
-                timeStampFile.close();
-
-                SoundSettings->StartTime = startTime;
-                StartTimeAbsolute.Data   = startTime;
-                CMN_LOG_CLASS_RUN_VERBOSE << std::setprecision(3) << std::fixed
-                                          << "OpenFile: absolute start time: " << StartTimeAbsolute.Data << std::endl;
-
-                alGetError();
-                alGenBuffers(1, SoundBuffer);
-                std::string err;
-
-                if (CheckALError(err)) {
-                    CMN_LOG_CLASS_RUN_ERROR << "OpenFile: OpenAL error: " << err
-                                            << " - while generating data BUFFER" << std::endl;
-                }
-
-                alBufferData(SoundBuffer[0], tmpFormat, Data, NumDataBytes, SoundSettings->frequency);
-                alGenSources(1, SoundSource);
-
-                if (CheckALError(err)) {
-                    CMN_LOG_CLASS_RUN_ERROR << "OpenFile: OpenAL error: " << err
-                                            << "- while creating data buffer and SOURCES" << std::endl;
-                }
-                alSourcei(SoundSource[0], AL_BUFFER, SoundBuffer[0]);
+            if (cisstWAVHeader.wfex.wFormatTag != 1) {
+                CMN_LOG_CLASS_RUN_ERROR << "OpenFile: wrong WAV format for file: " << FileName.Data << std::endl;
             }
 
-            Seek(StartTimeAbsolute);
-            RangeChangedEvent();
+            SoundSettings->nBytesPerSample   = cisstWAVHeader.wfex.wBitsPerSample / 8;
+            SoundSettings->nChannels         = cisstWAVHeader.wfex.nChannels;
+            SoundSettings->frequency         = cisstWAVHeader.wfex.nSamplesPerSec;
+
+            bytesPerWholeSample =  cisstWAVHeader.wfex.nBlockAlign;  // WAV_Header->wfex.nChannels * WAV_Header->wfex.wBitsPerSample / 8
+            startTime =   cisstWAVHeader.timeStamp;
         }
         else {
-            CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: type not Implemented" << FileName.Data << std::endl;
+
+            fseek(SoundFile, 0, SEEK_SET);
+            ::fread(WAVHeader, 1, sizeof(osaOpenALWAVHeader), SoundFile);
+
+            unsigned int tmpCurrent = ftell(SoundFile);
+
+            fseek(SoundFile, 0, SEEK_END);
+            NumDataBytes = ftell(SoundFile) - tmpCurrent;
+            fseek(SoundFile, tmpCurrent, SEEK_SET);
+            //this is the whole file in memory.
+
+            if (WAVHeader->wfex.wFormatTag != 1) {
+                CMN_LOG_CLASS_RUN_ERROR << "OpenFile: wrong WAV format for file: " << FileName.Data << std::endl;
+            }
+
+            SoundSettings->nBytesPerSample   = WAVHeader->wfex.wBitsPerSample / 8;
+            SoundSettings->nChannels         = WAVHeader->wfex.nChannels;
+            SoundSettings->frequency         = WAVHeader->wfex.nSamplesPerSec;
+
+            bytesPerWholeSample =  WAVHeader->wfex.nBlockAlign;  // WAV_Header->wfex.nChannels * WAV_Header->wfex.wBitsPerSample / 8
+
         }
+
+
+        LengthInSec = (double)NumDataBytes / bytesPerWholeSample  / (double) SoundSettings->frequency;
+
+        CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: file length is: "
+                                  << LengthInSec.Data << " seconds" << std::endl;
+
+        Data = new char[NumDataBytes];
+
+        ::fread(Data, 1, NumDataBytes, SoundFile);
+
+        CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: audioData size is: " << NumDataBytes <<std::endl;
+        // << " bytes; WAV header reports Data Size: " << WAVHeader->lDataSize
+        // << " bytes" << std::endl;
+
+        ALenum tmpFormat;
+
+        if (SoundSettings->nChannels == 1) {
+            if (SoundSettings->nBytesPerSample == 1) {
+                tmpFormat = AL_FORMAT_MONO8;
+            } else {
+                tmpFormat = AL_FORMAT_MONO16;
+            }
+        }
+        else {
+            if (SoundSettings->nBytesPerSample == 1) {
+                tmpFormat = AL_FORMAT_STEREO8;
+            }
+            else {
+                tmpFormat = AL_FORMAT_STEREO16;
+            }
+        }
+
+        //Open text file containing the datatimestamps:
+        std::string headerLine;
+        std::string timeStampFileName = FileName.Data + std::string(".txt");
+        std::ifstream timeStampFile(timeStampFileName.c_str());
+        double startTime = 0;
+        if (timeStampFile.is_open())
+        {
+            getline (timeStampFile,headerLine);
+            timeStampFile>>startTime;
+        }
+        else {
+            CMN_LOG_CLASS_RUN_ERROR << "Can't Open file: " << timeStampFileName <<std::endl;
+        }
+
+        timeStampFile.close();
+
+        SoundSettings->StartTime = startTime;
+        StartTimeAbsolute.Data   = startTime;
+        CMN_LOG_CLASS_RUN_VERBOSE << std::setprecision(3) << std::fixed
+                                  << "OpenFile: absolute start time: " << StartTimeAbsolute.Data << std::endl;
+
+        alGetError();
+        alGenBuffers(1, SoundBuffer);
+        std::string err;
+
+        if (CheckALError(err)) {
+            CMN_LOG_CLASS_RUN_ERROR << "OpenFile: OpenAL error: " << err
+                                    << " - while generating data BUFFER" << std::endl;
+        }
+
+        alBufferData(SoundBuffer[0], tmpFormat, Data, NumDataBytes, SoundSettings->frequency);
+        alGenSources(1, SoundSource);
+
+        if (CheckALError(err)) {
+            CMN_LOG_CLASS_RUN_ERROR << "OpenFile: OpenAL error: " << err
+                                    << "- while creating data buffer and SOURCES" << std::endl;
+        }
+        alSourcei(SoundSource[0], AL_BUFFER, SoundBuffer[0]);
+
+        Seek(StartTimeAbsolute);
+        RangeChangedEvent();
+
+    }
+    else {
+        CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: type not Implemented" << FileName.Data << std::endl;
     }
 }
-
 
 std::string osaOpenAL::GetALErrorString(ALenum err)
 {

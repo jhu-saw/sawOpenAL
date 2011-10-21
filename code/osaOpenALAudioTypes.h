@@ -61,6 +61,25 @@ struct osaOpenALWAVHeader
 };
 #pragma pack (pop)
 
+#pragma pack (push,1)
+struct osaOpenALCISSTWAVHeader
+{
+    char            szRIFF[4];
+    ALuint          lRIFFSize;  //the whole file size.
+    char            szWave[4];
+    char            szFmt[4];
+    ALuint          lFmtSize;
+    WAVEFORMATEX    wfex;
+   //removed in favor of a seperate text file, ensures compatibility with standard wav files.
+    char            szTime[4];  //name of the subchunk - "abTM" - so it does not clash with other times
+    ALuint          lTimeSize;  //size of the subchunk - 8
+    double          timeStamp;  //absolute start time
+    char            szData[4];
+    ALuint          lDataSize;
+};
+#pragma pack (pop)
+
+
 
 //CAI
 #pragma pack (push,1)

@@ -81,7 +81,7 @@ protected:
 
     mtsFunctionVoid RangeChangedEvent;
 
-public:
+ public:
     enum SoundFormat {MONO8, MONO16, STEREO8, STEREO16};
 
     osaOpenAL();
@@ -105,6 +105,9 @@ public:
     mtsBool   GetIsPlaying() { return IsPlaying;}
     mtsDouble GetTime() { return Time;}
     void GetStreamVolume(mtsDouble &volume) { volume = StreamVolume; }
+
+    //converts cisst wav format from 2010 to standard wav format
+   // static bool ConvertWAV10toWAV11(const std::string &inputFileName, const std::string &outputFileName);
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(osaOpenAL);
