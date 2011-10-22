@@ -37,7 +37,7 @@ struct osaOpenALWAVHeader;
 
 class osaOpenAL: public cmnGenericObject {
     // used to control the log level
-    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
+    CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LEVEL_RUN_VERBOSE);
 
 protected:
     enum FileType {CAI, WAV};
@@ -81,6 +81,15 @@ protected:
 
     mtsFunctionVoid RangeChangedEvent;
 
+    std::vector<double> TimeStamps;
+    std::vector<double> SamplePosInBytes;
+
+
+    //adds .txt to the .wav file name and writes the header
+    void OpenHeaderFile(const std::string & filename, std::ofstream & stream);
+    void CloseHeaderFile(std::ofstream & stream);
+    void WriteToHeaderFile(const double & timestamp, const int bytes, std::ofstream &stream);
+
  public:
     enum SoundFormat {MONO8, MONO16, STEREO8, STEREO16};
 
@@ -106,8 +115,9 @@ protected:
     mtsDouble GetTime() { return Time;}
     void GetStreamVolume(mtsDouble &volume) { volume = StreamVolume; }
 
-    //converts cisst wav format from 2010 to standard wav format
-   // static bool ConvertWAV10toWAV11(const std::string &inputFileName, const std::string &outputFileName);
+    //save a portion of the file to a new clip.
+    void SaveClip(const std::string &filePathPrefix, double startTime, double endTime);
+
 };
 
 CMN_DECLARE_SERVICES_INSTANTIATION(osaOpenAL);

@@ -124,7 +124,7 @@ void osaOpenAL::Run(void)
 
 void osaOpenAL::Pause(void)
 {
-    CMN_LOG_CLASS_RUN_VERBOSE << "Pause called" << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "Pause called" << std::endl;
     if (IsPlaying && (SoundFile)){
         alSourcePause(SoundSource[0]);
         IsPlaying = false;
@@ -134,7 +134,7 @@ void osaOpenAL::Pause(void)
 
 void osaOpenAL::Seek(const mtsDouble & time)
 {
-    CMN_LOG_CLASS_RUN_VERBOSE << "Seek called for " << time.Data <<std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "Seek called for " << time.Data <<std::endl;
 
     if (SoundFile) {
         bool tmpWasPlaying = IsPlaying;
@@ -172,12 +172,12 @@ void osaOpenAL::Play(void)
         alSourcef(SoundSource[0], AL_GAIN, Volume.Data);
         alSourcePlay(SoundSource[0]);
         IsPlaying = true;
-        CMN_LOG_CLASS_RUN_VERBOSE << "Play called" << std::endl;
+        CMN_LOG_CLASS_RUN_DEBUG << "Play called" << std::endl;
     } else {
         if (!SoundFile) {
             CMN_LOG_CLASS_RUN_WARNING << "Play called but no file to play" << std::endl;
         } else {
-            CMN_LOG_CLASS_RUN_VERBOSE << "Play called but already playing" << std::endl;
+            CMN_LOG_CLASS_RUN_DEBUG << "Play called but already playing" << std::endl;
         }
     }
 }
@@ -185,7 +185,7 @@ void osaOpenAL::Play(void)
 
 void osaOpenAL::Stop(void)
 {
-    CMN_LOG_CLASS_RUN_VERBOSE << "Stop called" << std::endl;
+    CMN_LOG_CLASS_RUN_DEBUG << "Stop called" << std::endl;
 
     ALint iState;
     alGetSourcei(SoundSource[0], AL_SOURCE_STATE, &iState);
@@ -387,10 +387,20 @@ void osaOpenAL::OpenFile(const mtsStdString & fName)
         std::string timeStampFileName = FileName.Data + std::string(".txt");
         std::ifstream timeStampFile(timeStampFileName.c_str());
         double startTime = 0;
+        int    bytePos   = 0;
+        double timestamp = 0;
+        TimeStamps.clear();
+        SamplePosInBytes.clear();
+
         if (timeStampFile.is_open())
         {
             getline (timeStampFile,headerLine);
-            timeStampFile>>startTime;
+            timeStampFile>>startTime>>bytePos;
+            while (!timeStampFile.eof()) {
+                timeStampFile>>timestamp>>bytePos;
+                TimeStamps.push_back(timestamp);
+                SamplePosInBytes.push_back(bytePos);
+            }
         }
         else {
             CMN_LOG_CLASS_RUN_ERROR << "Can't Open file: " << timeStampFileName <<std::endl;
@@ -400,6 +410,8 @@ void osaOpenAL::OpenFile(const mtsStdString & fName)
 
         SoundSettings->StartTime = startTime;
         StartTimeAbsolute.Data   = startTime;
+        //what is the end of the data - it should use the txt.
+        SoundSettings->EndTime = startTime + LengthInSec;
         CMN_LOG_CLASS_RUN_VERBOSE << std::setprecision(3) << std::fixed
                                   << "OpenFile: absolute start time: " << StartTimeAbsolute.Data << std::endl;
 
@@ -610,4 +622,127 @@ double osaOpenAL::GetEndTime() {
 
     return StartTimeAbsolute + LengthInSec;
 
+}
+
+void osaOpenAL::SaveClip(const std::string &filePathPrefix, double startTime, double endTime) {
+
+    if (startTime < SoundSettings->StartTime) {
+        startTime = SoundSettings->StartTime;
+    }
+    if (endTime > SoundSettings->EndTime) {
+        endTime = SoundSettings->EndTime;
+    }
+    CMN_LOG_CLASS_RUN_VERBOSE <<  std::setprecision(3) << std::fixed << "Start: "<< startTime << " End: " << endTime << " diff: "<< endTime - startTime << std::endl;
+
+    char strTime[50];
+    sprintf(strTime,"_%.3f.wav", startTime);
+
+    std::string filename = filePathPrefix + strTime;
+
+    osaOpenALWAVHeader wavHeader;
+
+    //Set up wav header
+    sprintf(wavHeader.szRIFF, "RIFF");
+    wavHeader.lRIFFSize = 0;
+    sprintf(wavHeader.szWave, "WAVE");
+    sprintf(wavHeader.szFmt, "fmt ");
+    wavHeader.lFmtSize = sizeof(WAVEFORMATEX); //18
+    wavHeader.wfex.wFormatTag = 1;
+    wavHeader.wfex.nChannels = SoundSettings->nChannels;
+    wavHeader.wfex.nSamplesPerSec = SoundSettings->frequency;
+    wavHeader.wfex.wBitsPerSample = SoundSettings->nBytesPerSample * 8;
+    wavHeader.wfex.nBlockAlign = wavHeader.wfex.nChannels * wavHeader.wfex.wBitsPerSample / 8;
+    wavHeader.wfex.nAvgBytesPerSec = wavHeader.wfex.nSamplesPerSec * wavHeader.wfex.nBlockAlign;
+    wavHeader.wfex.cbSize = 0;
+
+    sprintf(wavHeader.szData, "data");
+    wavHeader.lDataSize = 0;
+
+    FILE *          saveFile;
+
+    if ((saveFile = ::fopen(filename.c_str(), "wb")) == 0) {
+        CMN_LOG_CLASS_RUN_ERROR << "Record: file name is not valid! : '" << filename << "'" <<std::endl;
+        return;
+    }
+    else {
+
+    }
+
+    fwrite(WAVHeader, sizeof(osaOpenALWAVHeader), 1, saveFile);
+
+    int fileSize = sizeof(osaOpenALWAVHeader);
+
+    //figure out how to clip out the data (start and end samples)
+    //stream pos is in local time 0 - end;
+    int start = CalcStreamPos(startTime - SoundSettings->StartTime);
+    int end = CalcStreamPos(endTime - SoundSettings->StartTime);
+
+    int numOfSamples = end - start;
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "Num Of Samples: "<< numOfSamples << std::endl;
+
+    fwrite(&Data[start * SoundSettings->nBytesPerSample], numOfSamples * SoundSettings->nBytesPerSample,1,saveFile);
+    fileSize += numOfSamples * SoundSettings->nBytesPerSample;
+
+  //  if (FType == mtsOpenALRecord::WAV) {
+          wavHeader.lDataSize = fileSize;
+    //}
+
+    fclose(saveFile);
+
+    std::ofstream    headerStream;
+
+    OpenHeaderFile(filename,headerStream);
+
+    WriteToHeaderFile(startTime, 0, headerStream);
+
+    int offset = start * SoundSettings->nBytesPerSample;
+    if (!TimeStamps.empty()) {
+
+        unsigned int i = 0;
+        for (i = 0; i <  TimeStamps.size(); i++) {
+            if ( TimeStamps[i] > startTime )
+                break;
+        }
+
+        for (i; i <  TimeStamps.size(); i++) {
+            if ( TimeStamps[i] < SoundSettings->EndTime)
+                WriteToHeaderFile(TimeStamps[i],SamplePosInBytes[i] - offset, headerStream);
+            else
+                break;
+        }
+    }
+
+    CMN_LOG_CLASS_RUN_VERBOSE << "Saved Clip: '" << filename << "' size: " << fileSize/1000000 << " MBytes"<<std::endl;
+
+    CloseHeaderFile(headerStream);
+}
+
+void osaOpenAL::OpenHeaderFile(const std::string & filename, std::ofstream & stream)
+{
+    stream.close();
+    stream.clear();
+
+    std::string headerFName = filename + ".txt";
+    stream.open(headerFName.c_str(), std::ios::out | std::ios::app);
+
+    if (stream.fail()) {
+        CMN_LOG_CLASS_RUN_ERROR << "OpenHeaderFile: can't open file " << headerFName << std::endl;
+    }
+    else {
+        stream.precision(4);
+        stream.setf(std::ios::fixed);
+        stream << "Timestamp BytesSinceStart" << std::endl;
+    }
+}
+
+void osaOpenAL::CloseHeaderFile(std::ofstream & stream)
+{
+    stream.close();
+    stream.clear();
+}
+
+void osaOpenAL::WriteToHeaderFile(const double & timestamp, const int bytes, std::ofstream &stream)
+{
+    stream << timestamp << " " << bytes << std::endl;
 }
