@@ -28,7 +28,7 @@ if (cisst_FOUND)
   include (${CISST_USE_FILE})
 
   # sawOpenAL has been compiled within cisst, we should find it automatically
-  find_package (sawOpenAL REQUIRED HINTS "${CISST_BINARY_DIR}/saw/components")
+  find_package (sawOpenAL REQUIRED HINTS "${cisst_saw_BINARY_DIR}/saw/components")
 
   if (sawOpenAL_FOUND)
 
