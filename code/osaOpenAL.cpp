@@ -2,7 +2,7 @@
 /* ex: set filetype=cpp softtabstop=4 shiftwidth=4 tabstop=4 cindent expandtab: */
 
 /*
-  $Id: osaOpenAL.cpp 3069 2011-10-18 14:25:14Z adeguet1 $
+  $Id$
 
   Author(s):  Marcin Balicki
   Created on: 2011
