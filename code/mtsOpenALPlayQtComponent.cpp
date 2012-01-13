@@ -150,7 +150,7 @@ void mtsOpenALPlayQtComponent::timerEvent(QTimerEvent * event)
     mtsDouble t;
     Player.GetTime(t);
     PlayWidget.TimeLabel->setText(QString::number(t.Data, 'f', 3));
-    SeekSlider->setValue(int(t.Data - DataStartTime));
+    SeekSlider->setValue((int)(t.Data - DataStartTime));
 }
 
 

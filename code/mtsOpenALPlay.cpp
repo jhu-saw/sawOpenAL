@@ -139,12 +139,11 @@ void mtsOpenALPlay::Run(void)
         alGetSourcei(SoundSource[0], AL_SOURCE_STATE, &iState);
         if (iState != AL_PLAYING ){
             if (IsPlaying == true) {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Run: play stopped at: " << Time.Data << std::endl;
+                CMN_LOG_CLASS_RUN_VERBOSE << "Run: play stopped at: " << setiosflags(std::ios::fixed) << std::setprecision(3)<<Time.Data << std::endl;
                 IsPlaying = false;
             }
-        } else {
+        } 
 
-        }
     } else  {
         IsPlaying = false;
     }
@@ -163,7 +162,7 @@ void mtsOpenALPlay::Pause(void)
 
 void mtsOpenALPlay::Seek(const mtsDouble & time)
 {
-    CMN_LOG_CLASS_RUN_VERBOSE << "Seek called for " << time.Data <<std::endl;
+    CMN_LOG_CLASS_RUN_VERBOSE << "Seek called for " <<setiosflags(std::ios::fixed)<<std::setprecision(3)<< time.Data <<std::endl;
 
     if (SoundFile) {
         double alTime = time - StartTimeAbsolute;
@@ -172,11 +171,11 @@ void mtsOpenALPlay::Seek(const mtsDouble & time)
                 || FType == mtsOpenALPlay::WAV) {
 
             if (alTime > LengthInSec) {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Seek reached the end (" << StartTimeAbsolute + LengthInSec
-                                          << ") for requested time: "<< time.Data << std::endl;
+                CMN_LOG_CLASS_RUN_VERBOSE << "Seek reached the end (" <<setiosflags(std::ios::fixed)<<std::setprecision(3)<< StartTimeAbsolute + LengthInSec
+                                          << ") for requested time: "<<setiosflags(std::ios::fixed)<< std::setprecision(3)<< time.Data << std::endl;
             } else if (alTime < 0) {
-                CMN_LOG_CLASS_RUN_VERBOSE << "Seek reached the beginning (" <<StartTimeAbsolute
-                                          <<") for requested time: " << time.Data << std::endl;
+                CMN_LOG_CLASS_RUN_VERBOSE << "Seek reached the beginning (" <<setiosflags(std::ios::fixed)<<std::setprecision(3)<<StartTimeAbsolute
+                                          <<") for requested time: " << setiosflags(std::ios::fixed)<<std::setprecision(3)<< time.Data << std::endl;
             } else {
 
                 int samplePos = CalcStreamPos(alTime);
@@ -272,11 +271,11 @@ void mtsOpenALPlay::OpenFile(const mtsStdString & fName)
 
             LengthInSec = (double)NumDataBytes / bytesPerWholeSample  / (double)CAIHeader->frequency;
             CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: file length is : "
-                                      << LengthInSec.Data << " seconds" << std::endl;
+                                      << setiosflags(std::ios::fixed)<<std::setprecision(3) <<LengthInSec.Data << " seconds" << std::endl;
 
             StartTimeAbsolute = CAIHeader->StartTime;
-            CMN_LOG_CLASS_RUN_VERBOSE << std::setprecision(3) << std::fixed
-                                      <<"OpenFile: absolute start time: " << StartTimeAbsolute.Data << std::endl;
+            CMN_LOG_CLASS_RUN_VERBOSE << setiosflags(std::ios::fixed)<<std::setprecision(3) << std::fixed
+                                      <<"OpenFile: absolute start time: " << setiosflags(std::ios::fixed)<<std::setprecision(3)<< StartTimeAbsolute.Data << std::endl;
 
             Data = new char[NumDataBytes];
 
@@ -382,13 +381,13 @@ void mtsOpenALPlay::OpenFile(const mtsStdString & fName)
         LengthInSec = (double)NumDataBytes / bytesPerWholeSample  / (double) SoundSettings->frequency;
 
         CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: file length is: "
-                                  << LengthInSec.Data << " seconds" << std::endl;
+                                  <<  setiosflags(std::ios::fixed)<<std::setprecision(3)<<LengthInSec.Data << " seconds" << std::endl;
 
         Data = new char[NumDataBytes];
 
         ::fread(Data, 1, NumDataBytes, SoundFile);
 
-        CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: audioData size is: " << NumDataBytes <<std::endl;
+        CMN_LOG_CLASS_RUN_VERBOSE << "OpenFile: audioData size is: " <<  setiosflags(std::ios::fixed)<<std::setprecision(3)<<NumDataBytes <<std::endl;
         // << " bytes; WAV header reports Data Size: " << WAVHeader->lDataSize
         // << " bytes" << std::endl;
 
@@ -429,7 +428,7 @@ void mtsOpenALPlay::OpenFile(const mtsStdString & fName)
         SoundSettings->StartTime = startTime;
         StartTimeAbsolute.Data   = startTime;
         CMN_LOG_CLASS_RUN_VERBOSE << std::setprecision(3) << std::fixed
-                                  << "OpenFile: absolute start time: " << StartTimeAbsolute.Data << std::endl;
+                                  << "OpenFile: absolute start time: " <<  setiosflags(std::ios::fixed)<<std::setprecision(3)<<StartTimeAbsolute.Data << std::endl;
 
         alGetError();
         alGenBuffers(1, SoundBuffer);

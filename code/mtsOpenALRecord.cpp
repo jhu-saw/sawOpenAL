@@ -21,10 +21,10 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <sawOpenAL/mtsOpenALRecord.h>
-#include "osaOpenALAudioTypes.h"
 
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
+#include "osaOpenALAudioTypes.h"
 
 #include <fstream>
 
@@ -43,7 +43,7 @@ mtsOpenALRecord::mtsOpenALRecord(const std::string & taskName, double period, in
     CAIHeader = 0;
     WAVHeader = 0;
     CaptureDevice = 0;
-
+    
     SoundFile = 0;
     FileName = "";
     FType = mtsOpenALRecord::CAI;
@@ -300,7 +300,7 @@ void mtsOpenALRecord::Stop(void)
         else if (FType == mtsOpenALRecord::WAV) {
             CMN_LOG_CLASS_RUN_VERBOSE << "Stop: stopping WAV" << std::endl;
             ::fseek(SoundFile, 4, SEEK_SET);
-            ::u_int32_t iSize = WAVHeader->lDataSize + sizeof(osaOpenALWAVHeader);
+            u_int32_t iSize = WAVHeader->lDataSize + sizeof(osaOpenALWAVHeader);
             ::fwrite(&iSize, 4, 1, SoundFile);
             //write the data size at the end of the header.
             ::fseek(SoundFile, sizeof(osaOpenALWAVHeader) - 4, SEEK_SET);

@@ -27,18 +27,25 @@ http://www.cisst.org/cisst/license.txt.
 #include <sawOpenAL/sawOpenAL.h>
 #include <sawOpenAL/sawOpenALQt.h>
 #include <QApplication>
+#include  <QCoreApplication>
 
 
-//icludes for kill quit signals.
+//includes for kill quit signals.
+
+#ifndef _MSC_VER  //not available on windows.
+
 #include  <stdio.h>
 #include  <sys/types.h>
 #include  <signal.h>
 #include  <sys/ipc.h>
 #include  <sys/shm.h>
-#include  <QCoreApplication>
 
+#endif
+
+#ifndef _MSC_VER  //not available on windows.
 void  SIGQUIT_Handler(int sig)
 {
+
     signal(sig, SIG_IGN);
     printf("From SIGQUIT: just got a %d (SIGQUIT ^\\) signal"
            " and is about to quit\n", sig);
@@ -57,10 +64,13 @@ void Register_SIG_QUIT_Handler(void) {
     }
 
 }
+#endif
 
 int main(int argc, char *argv[])
 {
+#ifndef _MSC_VER  //not available on windows.   
     Register_SIG_QUIT_Handler();
+#endif
 
     cmnLogger::SetMask(CMN_LOG_ALLOW_ALL);
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);

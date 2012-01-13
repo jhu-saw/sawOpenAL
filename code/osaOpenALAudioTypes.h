@@ -26,8 +26,21 @@ http://www.cisst.org/cisst/license.txt.
 #include "al.h"
 #include "alc.h"
 //#include "AL/alut.h"
-#include <stdint.h>
 #include <string>
+
+#ifdef _MSC_VER
+
+typedef __int32 int32_t;
+typedef unsigned __int32 uint32_t;
+typedef __int64 int64_t;
+typedef unsigned __int64 uint64_t;
+typedef unsigned __int32 uint32_t;
+typedef unsigned __int32 u_int32_t;
+
+#else
+#include <stdint.h>
+#endif
+
 
 // WAV
 #pragma pack (push,1)
