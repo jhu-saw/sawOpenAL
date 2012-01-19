@@ -91,8 +91,8 @@ void mtsOpenALPlayQtComponent::MakeQTConnections(void)
                      this, SLOT(QSlotVolumeSliderMoved(int)));
 
 
-    QObject::connect(this->SeekSlider, SIGNAL(sliderMoved(double)),
-                     this, SLOT(QSlotSeekSliderMoved(double)));
+    QObject::connect(this->SeekSlider, SIGNAL(sliderMoved(int)),
+                     this, SLOT(QSlotSeekSliderMoved(int)));
 
     QObject::connect(this, SIGNAL(QSignalUpdateRange()),
                      this, SLOT(QSlotUpdateRange()));
@@ -109,8 +109,7 @@ void mtsOpenALPlayQtComponent::Configure(const std::string & CMN_UNUSED(filename
 
 void mtsOpenALPlayQtComponent::ErrorMessage(const std::string & message)
 {
-    //    ErrorMessageDialog->showMessage(tr(msg.c_str()));
-    int ret = QMessageBox::critical(this->GetWidget(), tr(GetName().c_str()), tr(message.c_str()));
+    QMessageBox::critical(this->GetWidget(), tr(GetName().c_str()), tr(message.c_str()));
 }
 
 
@@ -126,7 +125,7 @@ void mtsOpenALPlayQtComponent::QSlotPauseClicked()
 }
 
 
-void mtsOpenALPlayQtComponent::timerEvent(QTimerEvent * event)
+void mtsOpenALPlayQtComponent::timerEvent(QTimerEvent * )
 {
     //PlayWidget.TimeLabel->setText(QString::number(Time.Data,'f', 3));
     mtsBool isPlaying;
@@ -138,7 +137,7 @@ void mtsOpenALPlayQtComponent::timerEvent(QTimerEvent * event)
         Player.GetStreamVolume(v);
         PlayWidget.VolumeProgressBar->setValue(v.Data * 100);
         //the plot widget probably uses floats which does not allow for plotting timestamped data.
-        DataTrace->AddPoint(vctDouble2(v.Timestamp() - DataStartTime, v.Data));
+        DataTrace->AppendPoint(vctDouble2(v.Timestamp() - DataStartTime, v.Data));
         //std::cout<<v<<std::endl;
         Plot->updateGL();
     }
@@ -150,7 +149,8 @@ void mtsOpenALPlayQtComponent::timerEvent(QTimerEvent * event)
     mtsDouble t;
     Player.GetTime(t);
     PlayWidget.TimeLabel->setText(QString::number(t.Data, 'f', 3));
-    SeekSlider->setValue((int)(t.Data - DataStartTime));
+    if (!SeekSlider->isSliderDown())
+        SeekSlider->setValue((int)(t.Data - DataStartTime));
 }
 
 
@@ -175,7 +175,7 @@ void mtsOpenALPlayQtComponent::QSlotVolumeSliderMoved(int v)
 }
 
 
-void mtsOpenALPlayQtComponent::QSlotSeekSliderMoved(double v)
+void mtsOpenALPlayQtComponent::QSlotSeekSliderMoved(int v)
 {
     //Player.Pause();
     Player.Seek(mtsDouble(DataStartTime + v));

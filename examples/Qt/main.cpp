@@ -85,8 +85,8 @@ int main(int argc, char *argv[])
 
     //create openAL related objects
 
-    mtsOpenALPlay       *player     = new mtsOpenALPlay("PlayUtility", 5*cmn_ms);
-    mtsOpenALRecord        *recorder   = new mtsOpenALRecord("RecUtility",   5*cmn_ms);
+    mtsOpenALPlay       *player     = new mtsOpenALPlay("PlayUtility", 1*cmn_ms);
+    mtsOpenALRecord        *recorder   = new mtsOpenALRecord("RecUtility",   1*cmn_ms);
     mtsOpenALPlayQtComponent     *playerQT   =  new mtsOpenALPlayQtComponent("QTPlayer", 30*cmn_ms);
     mtsOpenALRecordQtComponent   *recorderQT =  new mtsOpenALRecordQtComponent("QTRecorder", 30*cmn_ms);
 

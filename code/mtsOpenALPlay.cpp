@@ -185,8 +185,8 @@ void mtsOpenALPlay::Seek(const mtsDouble & time)
                 //! \todo Convert the time to sample offset because this call might be too low of a resolution.
                 //                alSourcef(SoundSource[0], AL_SEC_OFFSET, t);
                 alSourcei(SoundSource[0], AL_SAMPLE_OFFSET, samplePos);
-                //alSourcePlay(SoundSource[0]);
-                //alSourcePause(SoundSource[0]);
+                CMN_LOG_CLASS_RUN_VERBOSE << "Seek set to sample: " <<setiosflags(std::ios::fixed)<< samplePos <<std::endl;
+
             }
         }
     }
@@ -197,9 +197,14 @@ void mtsOpenALPlay::Play(void)
 {
     if (!IsPlaying && (SoundFile)) {
         alSourcef(SoundSource[0], AL_GAIN, Volume.Data);
+        //for some reason play resets the play pos if seek was called when paused.
+        ALint  currentPos(0);
+        alGetSourcei (SoundSource[0], AL_SAMPLE_OFFSET, &currentPos);
         alSourcePlay(SoundSource[0]);
+        alSourcei(SoundSource[0], AL_SAMPLE_OFFSET, currentPos);
+
         IsPlaying = true;
-        CMN_LOG_CLASS_RUN_VERBOSE << "Play called" << std::endl;
+        CMN_LOG_CLASS_RUN_VERBOSE << "Play called at sample: " << currentPos << std::endl;
     } else {
         if (!SoundFile) {
             CMN_LOG_CLASS_RUN_WARNING << "Play called but no file to play" << std::endl;
@@ -220,7 +225,7 @@ void mtsOpenALPlay::Stop(void)
             || iState == AL_PAUSED) {
         IsPlaying = false;
     }
-    alSourceStop(SoundSource[0]);
+    alSourcePause(SoundSource[0]);
 }
 
 
@@ -585,7 +590,7 @@ double mtsOpenALPlay::CalcStreamVolume(int samplePos)
     if (SoundSettings->nBytesPerSample == 2) {
         short *buf = (short *) Data;
         int v = 0;
-        for (unsigned int i = 0; i < numberOfSamples ; i++) {
+        for ( int i = 0; i < numberOfSamples ; i++) {
             v = abs(buf[ (samplePos + i) * SoundSettings->nChannels ]); //just in case it is in stereo (get first one)
             if (volume < v) {
                 volume = v;
@@ -597,7 +602,7 @@ double mtsOpenALPlay::CalcStreamVolume(int samplePos)
     else {
         //8bit is 0-255 with 128 being zero
         int v = 0;
-        for (unsigned int i = 0; i < numberOfSamples ; i++) {
+        for ( int i = 0; i < numberOfSamples ; i++) {
             v = Data[(samplePos + i) * SoundSettings->nChannels];        //just in case it is in stereo (get first one)
             v = abs(v-127);
             if (volume < v) {

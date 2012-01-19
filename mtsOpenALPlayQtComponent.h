@@ -91,7 +91,7 @@ class CISST_EXPORT mtsOpenALPlayQtComponent: public QObject, public mtsComponent
     QErrorMessage * ErrorMessageDialog;
     void ErrorMessage(const std::string & message);
 
-    void timerEvent(QTimerEvent *event);
+    void timerEvent(QTimerEvent *);
 
     struct {
         mtsFunctionRead     GetIsPlaying;
@@ -118,7 +118,7 @@ class CISST_EXPORT mtsOpenALPlayQtComponent: public QObject, public mtsComponent
     void QSlotFileDialogClicked();
     void QSlotOpenFileClicked();
     void QSlotVolumeSliderMoved(int v);
-    void QSlotSeekSliderMoved(double v);
+    void QSlotSeekSliderMoved(int v);
     void QSlotUpdateRange(void);
 
  signals:
