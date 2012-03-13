@@ -1,7 +1,7 @@
 #
 # $Id$
 #
-# (C) Copyright 2005-2011 Johns Hopkins University (JHU), All Rights
+# (C) Copyright 2005-2012 Johns Hopkins University (JHU), All Rights
 # Reserved.
 #
 # --- begin cisst license - do not edit ---
@@ -28,17 +28,17 @@ if (cisst_FOUND)
   include (${CISST_USE_FILE})
 
   # sawOpenAL has been compiled within cisst, we should find it automatically
-  find_package (sawOpenAL REQUIRED HINTS "${cisst_saw_BINARY_DIR}/saw/components")
+  cisst_find_saw_component (sawOpenAL REQUIRED)
 
   if (sawOpenAL_FOUND)
 
     # sawOpenAL configuration
     include_directories (${sawOpenAL_INCLUDE_DIR})
     link_directories (${sawOpenAL_LIBRARY_DIR})
-    
+
     add_executable (sawOpenALExampleQt
                     main.cpp)
-            
+
     # link against non cisst libraries and saw components
     target_link_libraries (sawOpenALExampleQt
                            ${sawOpenALQt_LIBRARIES}
