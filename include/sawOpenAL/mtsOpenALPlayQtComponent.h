@@ -41,7 +41,7 @@ http://www.cisst.org/cisst/license.txt.
 //! PlayerManager should show the start and end of the data??
 
 //! /todo Decide how to deal with path/prefix
-//! /todo Centrilize quit button.
+//! /todo Centralize quit button.
 
 class CISST_EXPORT mtsOpenALPlayQtComponent: public QObject, public mtsComponent
 {

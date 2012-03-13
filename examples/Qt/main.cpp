@@ -7,7 +7,7 @@
   Author(s):  Marcin Balicki
   Created on: 2011
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
+  (C) Copyright 2011-2012 Johns Hopkins University (JHU), All Rights
   Reserved.
 
 --- begin cisst license - do not edit ---
@@ -20,32 +20,29 @@ http://www.cisst.org/cisst/license.txt.
 
 */
 
-#include <cisstOSAbstraction/osaThreadedLogFile.h>
+#include <cisstOSAbstraction/osaSleep.h>
 #include <cisstMultiTask/mtsTaskManager.h>
-#include <cisstCommon.h>
-#include <cisstOSAbstraction.h>
 #include <sawOpenAL/sawOpenAL.h>
 #include <sawOpenAL/sawOpenALQt.h>
 #include <QApplication>
-#include  <QCoreApplication>
+#include <QCoreApplication>
 
 
 //includes for kill quit signals.
 
 #ifndef _MSC_VER  //not available on windows.
 
-#include  <stdio.h>
-#include  <sys/types.h>
-#include  <signal.h>
-#include  <sys/ipc.h>
-#include  <sys/shm.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <signal.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 #endif
 
 #ifndef _MSC_VER  //not available on windows.
-void  SIGQUIT_Handler(int sig)
+void SIGQUIT_Handler(int sig)
 {
-
     signal(sig, SIG_IGN);
     printf("From SIGQUIT: just got a %d (SIGQUIT ^\\) signal"
            " and is about to quit\n", sig);
@@ -56,19 +53,18 @@ void  SIGQUIT_Handler(int sig)
     printf("Just called Quit\n");
 }
 
-void Register_SIG_QUIT_Handler(void) {
-
+void Register_SIG_QUIT_Handler(void)
+{
     if (signal(SIGQUIT, SIGQUIT_Handler) == SIG_ERR) {
         printf("SIGQUIT install error\n");
         exit(2);
     }
-
 }
 #endif
 
 int main(int argc, char *argv[])
 {
-#ifndef _MSC_VER  //not available on windows.   
+#ifndef _MSC_VER  //not available on windows.
     Register_SIG_QUIT_Handler();
 #endif
 
@@ -76,7 +72,6 @@ int main(int argc, char *argv[])
     cmnLogger::AddChannel(std::cout, CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClassMatching("audio", CMN_LOG_ALLOW_ALL);
     cmnLogger::SetMaskClassMatching("AL", CMN_LOG_ALLOW_ALL);
-
 
     // add the tasks to the task manager
     mtsTaskManager * taskManager = mtsTaskManager::GetInstance();
