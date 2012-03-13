@@ -26,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <sawOpenAL/sawOpenALQt.h>
 #include <QApplication>
 #include <QCoreApplication>
+#include <sawOpenAL/sawNoteRecorderQtComponent.h>
 
 
 //includes for kill quit signals.
@@ -85,10 +86,14 @@ int main(int argc, char *argv[])
     mtsOpenALPlayQtComponent     *playerQT   =  new mtsOpenALPlayQtComponent("QTPlayer", 30*cmn_ms);
     mtsOpenALRecordQtComponent   *recorderQT =  new mtsOpenALRecordQtComponent("QTRecorder", 30*cmn_ms);
 
+    sawNoteRecorderQtComponent   *noteRecorder = new sawNoteRecorderQtComponent("NoteRecorder", 30 * cmn_ms);
+
+
     taskManager->AddComponent(recorder);
     taskManager->AddComponent(player);
     taskManager->AddComponent(playerQT);
     taskManager->AddComponent(recorderQT);
+    taskManager->AddComponent(noteRecorder);
 
     taskManager->Connect(recorderQT->GetName(), "RequiresAudioRecorder",  recorder->GetName(), "ProvidesAudioRecorder");
     taskManager->Connect(playerQT->GetName(), "RequiresAudioPlayer",    player->GetName(),  "ProvidesAudioPlayer");
@@ -103,6 +108,7 @@ int main(int argc, char *argv[])
     application.setStyle("Plastique");
     recorderQT->Configure();
     playerQT->Configure();
+    noteRecorder->Configure();
 
     application.exec();
 

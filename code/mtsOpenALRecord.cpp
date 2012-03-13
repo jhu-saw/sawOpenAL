@@ -24,7 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 
 #include <cisstOSAbstraction/osaGetTime.h>
 #include <cisstMultiTask/mtsInterfaceProvided.h>
-#include "osaOpenALAudioTypes.h"
+#include <sawOpenAL/osaOpenALAudioTypes.h>
 
 #include <fstream>
 

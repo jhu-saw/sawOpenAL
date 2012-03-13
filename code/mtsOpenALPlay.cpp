@@ -21,7 +21,7 @@ http://www.cisst.org/cisst/license.txt.
 */
 
 #include <sawOpenAL/mtsOpenALPlay.h>
-#include "osaOpenALAudioTypes.h"
+#include <sawOpenAL/osaOpenALAudioTypes.h>
 
 #include <cisstMultiTask/mtsInterfaceProvided.h>
 
