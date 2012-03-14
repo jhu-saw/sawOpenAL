@@ -166,8 +166,8 @@ private:
     void AddNote(const QString & noteTxt);
 
     //Store and Load notes from files.
-    void LoadNotesToGUI();
-    void SaveNotesFromGUI();
+    void LoadPresets();
+    void SavePresets();
 
     Ui::sawNoteRecorderQtWidget NoteRecorderWidget;
     void MakeQTConnections(void);
@@ -193,11 +193,11 @@ public slots:
     void QSlotAddExtraNoteClicked();
     void QSlotNewLogFileClicked();
 
-    void QSlotSaveNotesClicked() {
-        SaveNotesFromGUI();
+    void QSlotSavePresetsClicked() {
+        SavePresets();
     }
-    void QSlotLoadNotesClicked() {
-        LoadNotesToGUI();
+    void QSlotLoadPresetsClicked() {
+        LoadPresets();
     }
 
     void QSlotPathClicked(void);

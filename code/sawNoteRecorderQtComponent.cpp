@@ -76,9 +76,9 @@ void sawNoteRecorderQtComponent::MakeQTConnections(void)
     QObject::connect(NoteRecorderWidget.AddNoteButton, SIGNAL(clicked()),
                      this, SLOT(QSlotAddExtraNoteClicked()));
     QObject::connect(NoteRecorderWidget.LoadNotesButton, SIGNAL(clicked()),
-                     this, SLOT(QSlotLoadNotesClicked()));
+                     this, SLOT(QSlotLoadPresetsClicked()));
     QObject::connect(NoteRecorderWidget.SaveNotesButton, SIGNAL(clicked()),
-                     this, SLOT(QSlotSaveNotesClicked()));
+                     this, SLOT(QSlotSavePresetsClicked()));
     QObject::connect(NoteRecorderWidget.NewFileButton, SIGNAL(clicked()),
                      this, SLOT(QSlotNewLogFileClicked()));
 }
@@ -180,7 +180,7 @@ void sawNoteRecorderQtComponent::QSlotAddExtraNoteClicked() {
 }
 
 
-void sawNoteRecorderQtComponent::LoadNotesToGUI() {
+void sawNoteRecorderQtComponent::LoadPresets() {
 
     CMN_LOG_CLASS_RUN_VERBOSE << "LoadNotes : " << std::endl;
 
@@ -215,7 +215,7 @@ void sawNoteRecorderQtComponent::LoadNotesToGUI() {
 
 }
 
-void sawNoteRecorderQtComponent::SaveNotesFromGUI() {
+void sawNoteRecorderQtComponent::SavePresets() {
 
     CMN_LOG_CLASS_RUN_VERBOSE << "SaveNotes : " << std::endl;
 

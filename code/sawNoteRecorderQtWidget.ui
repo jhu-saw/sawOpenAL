@@ -131,7 +131,7 @@
             <item row="0" column="0">
              <widget class="QPushButton" name="LoadNotesButton">
               <property name="text">
-               <string>Load  GUINotes</string>
+               <string>Load Presets</string>
               </property>
              </widget>
             </item>
@@ -144,7 +144,7 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>Save GUINotes</string>
+               <string>Save Presets</string>
               </property>
              </widget>
             </item>
