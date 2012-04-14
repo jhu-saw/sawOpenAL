@@ -24,6 +24,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <QStringList>
 #include <QList>
 #include <QFileDialog>
+#include <cmath>
 
 #include <cisstMultiTask/mtsVector.h> // for mtsStdStringVec
 #include <cisstMultiTask/mtsTaskManager.h>
@@ -48,7 +49,10 @@ mtsOpenALRecordQtComponent::mtsOpenALRecordQtComponent(const std::string & name,
 
     // create the widgets
     Plot        = new vctPlot2DOpenGLQtWidget(&Widget);
-    DataTrace   = Plot->AddTrace("Data");
+    DataTrace   = Plot->AddSignal("VolumeData");
+   // Plot->SetContinuousFitY(false);
+   // Plot->SetContinuousFitX(true);
+   // Plot->FitY(0,100);
 
     RecWidget.MainVLayout->addWidget(Plot);
 
@@ -115,7 +119,7 @@ void mtsOpenALRecordQtComponent::Configure(const std::string & CMN_UNUSED(filena
 void mtsOpenALRecordQtComponent::ErrorMessage(const std::string & message)
 {
     //    ErrorMessageDialog->showMessage(tr(msg.c_str()));
-    int ret = QMessageBox::critical(this->GetWidget(), tr(GetName().c_str()), tr(message.c_str()));
+    QMessageBox::critical(this->GetWidget(), tr(GetName().c_str()), tr(message.c_str()));
 }
 
 
@@ -147,19 +151,41 @@ void mtsOpenALRecordQtComponent::timerEvent(QTimerEvent * CMN_UNUSED(event))
     //RecWidget.TimeLabel->setText(QString::number(Time.Data,'f', 3));
     mtsBool isRecording;
     Recorder.GetIsRecording(isRecording);
-    if (isRecording) {
-        RecWidget.IsRecordingLabel->setStyleSheet("QLabel { background-color : red; color : white; }");
-        RecWidget.IsRecordingLabel->setText("ON AIR");
-    }
-    else {
-        RecWidget.IsRecordingLabel->setStyleSheet("QLabel { background-color : grey; color : black; }");
-        RecWidget.IsRecordingLabel->setText("OFF AIR");
-    }
 
     mtsDouble v;
     Recorder.GetStreamVolume(v);
+
+    if (isRecording) {
+
+        double period = 3;
+        double halfPeriod = period / 2.0;
+        double sec = fmod(v.Timestamp(), period);
+        int color;
+
+        if (sec < halfPeriod) {
+            color  = static_cast<int>((sec/halfPeriod) * 255);
+        }
+        else
+        {
+            color  = static_cast<int>(255 - ( (sec - halfPeriod)/halfPeriod * 255));
+        }
+
+        RecWidget.IsRecordingLabel->setStyleSheet("QLabel { background :  qradialgradient(cx:0, cy:0, radius: 2, fx:0.5, fy:0.5, stop:0 white, stop:1 hsv(0," + QString::number(color) + ",255) );  border-radius: 3px; color : black;}");
+        RecWidget.IsRecordingLabel->setText("ON AIR");
+        RecWidget.IsRecordingLabel->setAlignment(Qt::AlignCenter);
+      //   RecWidget.IsRecordingLabel->.setAlignment(Qt::AlignmentFlag(AlignRight); // align the text to the right
+
+    }
+    else {
+        //        RecWidget.IsRecordingLabel->setStyleSheet("QLabel { background-color : grey; color : black; }");
+        RecWidget.IsRecordingLabel->setStyleSheet("QLabel { background :  qradialgradient(cx:0, cy:0, radius: 2, fx:0.5, fy:0.5, stop:0 rgba(0,255,0, 60%), stop:1  rgba(0,255,0, 60%)) ;  border-radius: 3px; color : black;}");
+
+        RecWidget.IsRecordingLabel->setText("OFF AIR");
+        RecWidget.IsRecordingLabel->setAlignment(Qt::AlignCenter);
+    }
+
     RecWidget.VolumeProgressBar->setValue(v.Data * 100);
-    DataTrace->AddPoint(vctDouble2(v.Timestamp(), v.Data));
+    DataTrace->AppendPoint(vctDouble2(v.Timestamp(), v.Data));
 
     Recorder.GetTime(v);
     RecWidget.TimeLabel->setText(QString::number(v.Data,'f', 3));

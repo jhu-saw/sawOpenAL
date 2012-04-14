@@ -46,7 +46,9 @@ mtsOpenALPlayQtComponent::mtsOpenALPlayQtComponent(const std::string & name, dou
 
     // create the widgets
     Plot        = new vctPlot2DOpenGLQtWidget(&Widget);
-    DataTrace   = Plot->AddTrace("Data");
+    Plot->SetNumberOfPoints(400);
+
+    DataTrace   = Plot->AddSignal("VolumeData");
 
     PlayWidget.MainVLayout->addWidget(Plot);
 

@@ -99,8 +99,7 @@ class CISST_EXPORT mtsOpenALRecordQtComponent: public QObject, public mtsCompone
     void timerEvent(QTimerEvent *event);
 
     vctPlot2DOpenGLQtWidget     * Plot;
-    vctPlot2DBase::Trace        * DataTrace;
-
+    vctPlot2DBase::Signal       * DataTrace;
 
  public slots:
 

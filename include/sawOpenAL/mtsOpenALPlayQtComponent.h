@@ -85,7 +85,7 @@ class CISST_EXPORT mtsOpenALPlayQtComponent: public QObject, public mtsComponent
     mtsDouble PlayUntilTime;
 
     vctPlot2DOpenGLQtWidget     * Plot;
-    vctPlot2DBase::Trace        * DataTrace;
+    vctPlot2DBase::Signal       * DataTrace;
 
     osaTimeServer TimeServer;
     QErrorMessage * ErrorMessageDialog;
