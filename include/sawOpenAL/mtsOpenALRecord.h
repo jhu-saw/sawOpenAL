@@ -42,7 +42,7 @@ struct osaOpenALWAVHeader;
 
 //mono 16 bit at 441000 Hz is about 320 Mbytes per hour.
 
-class mtsOpenALRecord: public mtsTaskPeriodic {
+class CISST_EXPORT mtsOpenALRecord: public mtsTaskPeriodic {
     // used to control the log level
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 

@@ -33,12 +33,14 @@ http://www.cisst.org/cisst/license.txt.
 
 #include "ui_mtsOpenALRecordQtWidget.h"
 
+// Always include last!
+#include "sawOpenALExportQt.h"
 
 //! /todo How to manage start and stop of the
 //! PlayerManager should show the start and end of the data??
 
 //! /todo Decide how to deal with path/prefix
-//! /todo Centrilize quit button.
+//! /todo Centralize quit button.
 
 
 class CISST_EXPORT mtsOpenALRecordQtComponent: public QObject, public mtsComponent

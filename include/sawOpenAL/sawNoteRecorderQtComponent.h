@@ -54,7 +54,7 @@ http://www.cisst.org/cisst/license.txt.
 
 
 //! /todo Decide how to deal with path/prefix
-//! /todo Centrilize quit button.
+//! /todo Centralize quit button.
 
 class NoteWidget : public QWidget {
     Q_OBJECT

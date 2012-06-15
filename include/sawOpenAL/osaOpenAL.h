@@ -35,7 +35,7 @@ struct osaOpenALWAVHeader;
 // Always include last!
 #include <sawOpenAL/sawOpenALExport.h>
 
-class osaOpenAL: public cmnGenericObject {
+class CISST_EXPORT osaOpenAL: public cmnGenericObject {
     // used to control the log level
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_LEVEL_RUN_VERBOSE);
 

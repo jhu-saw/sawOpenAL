@@ -35,7 +35,7 @@ struct osaOpenALWAVHeader;
 // Always include last!
 #include <sawOpenAL/sawOpenALExport.h>
 
-class mtsOpenALPlay: public mtsTaskPeriodic {
+class CISST_EXPORT mtsOpenALPlay: public mtsTaskPeriodic {
     // used to control the log level
     CMN_DECLARE_SERVICES(CMN_NO_DYNAMIC_CREATION, CMN_LOG_ALLOW_ERRORS_AND_WARNINGS);
 
