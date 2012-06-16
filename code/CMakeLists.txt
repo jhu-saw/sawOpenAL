@@ -85,7 +85,7 @@ if (cisst_FOUND_AS_REQUIRED)
   endif (CISST_HAS_QT)
 
   configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/sawOpenALConfig.cmake.in"
-                  "${sawComponents_BINARY_DIR}/sawOpenALConfig.cmake"
+                  "${sawOpenAL_BINARY_DIR}/sawOpenALConfig.cmake"
                    @ONLY@)
 
 else (cisst_FOUND_AS_REQUIRED)
