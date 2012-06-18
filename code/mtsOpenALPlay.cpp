@@ -215,6 +215,25 @@ void mtsOpenALPlay::Play(void)
 }
 
 
+void mtsOpenALPlay::Loop(void)
+{
+    if (!IsPlaying && (SoundFile)) {
+        alSourcef(SoundSource[0], AL_GAIN, Volume.Data);
+        alSourcei(SoundSource[0], AL_LOOPING, AL_TRUE);
+        alSourcePlay(SoundSource[0]);
+
+        IsPlaying = true;
+        CMN_LOG_CLASS_RUN_VERBOSE << "Loop started" << std::endl;
+    } else {
+        if (!SoundFile) {
+            CMN_LOG_CLASS_RUN_WARNING << "Loop called but no file to play" << std::endl;
+        } else {
+            CMN_LOG_CLASS_RUN_VERBOSE << "Loop called but already playing" << std::endl;
+        }
+    }
+}
+
+
 void mtsOpenALPlay::Stop(void)
 {
     CMN_LOG_CLASS_RUN_VERBOSE << "Stop called" << std::endl;

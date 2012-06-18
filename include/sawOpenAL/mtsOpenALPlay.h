@@ -90,6 +90,7 @@ public:
     inline void Configure(const std::string & CMN_UNUSED(filename)) {};
     void Startup(void);    // set some initial values
     void Play(void);
+    void Loop(void);
     void Pause(void);
     void Stop(void);
     void OpenFile(const mtsStdString & fName);
