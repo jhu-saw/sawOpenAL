@@ -444,7 +444,7 @@ void mtsOpenALPlay::OpenFile(const mtsStdString & fName)
             timeStampFile>>startTime;
         }
         else {
-            CMN_LOG_CLASS_RUN_ERROR << "Can't Open file: " << timeStampFileName <<std::endl;
+            CMN_LOG_CLASS_RUN_WARNING << "Can't Open file: " << timeStampFileName <<std::endl;
         }
 
         timeStampFile.close();
