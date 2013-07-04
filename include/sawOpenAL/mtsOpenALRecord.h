@@ -81,7 +81,7 @@ protected:
     //! /todo this needs checks to see if the device is being used?
     void SetCaptureDeviceName(const mtsStdString & deviceName);
     void SetCaptureDeviceID(const mtsUInt & deviceID);
-    void GetCaptureDeviceNames(mtsStdStringVec & names) const;
+    void GetCaptureDeviceNames(mtsStdStringVecProxy & names) const;
 
     void CalcStreamVolume(ALchar * stream, int numberOfSamples);
 

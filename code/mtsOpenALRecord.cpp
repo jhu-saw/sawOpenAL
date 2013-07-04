@@ -92,7 +92,7 @@ mtsOpenALRecord::mtsOpenALRecord(const std::string & taskName, double period, in
         provided->AddCommandVoid(&mtsOpenALRecord::Stop,   this,    "Stop");
         provided->AddCommandWrite(&mtsOpenALRecord::SetCaptureDeviceName, this,    "SetCaptureDeviceName", mtsStdString());
         provided->AddCommandWrite(&mtsOpenALRecord::SetCaptureDeviceID, this,      "SetCaptureDeviceID", mtsUInt());
-        provided->AddCommandRead(&mtsOpenALRecord::GetCaptureDeviceNames,this,     "GetCaptureDeviceNames", mtsStdStringVec());
+        provided->AddCommandRead(&mtsOpenALRecord::GetCaptureDeviceNames,this,     "GetCaptureDeviceNames", mtsStdStringVecProxy());
     }
 
     StreamVolume = 0;
@@ -353,7 +353,7 @@ void mtsOpenALRecord::GetFileName(mtsStdString & fileName) const
 
 
 
-void mtsOpenALRecord::GetCaptureDeviceNames(mtsStdStringVec & names) const
+void mtsOpenALRecord::GetCaptureDeviceNames(mtsStdStringVecProxy & names) const
 {
     // Get list of available Capture Devices
     const ALchar *pDeviceList = alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER);
@@ -364,8 +364,8 @@ void mtsOpenALRecord::GetCaptureDeviceNames(mtsStdStringVec & names) const
             while (*pDeviceList)
                 {
                     CMN_LOG_CLASS_RUN_VERBOSE << " - " << i++ << ": " << pDeviceList << std::endl;
-                    names.resize(i);
-                    names[i-1]= std::string(pDeviceList);
+                    names.GetData().resize(i);
+                    names.GetData()[i-1]= std::string(pDeviceList);
                     pDeviceList += strlen(pDeviceList) + 1;
                 }
         }
