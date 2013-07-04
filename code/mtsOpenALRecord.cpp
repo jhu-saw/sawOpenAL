@@ -7,8 +7,7 @@
   Author(s):  Marcin Balicki
   Created on: 2011
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -92,7 +91,7 @@ mtsOpenALRecord::mtsOpenALRecord(const std::string & taskName, double period, in
         provided->AddCommandVoid(&mtsOpenALRecord::Stop,   this,    "Stop");
         provided->AddCommandWrite(&mtsOpenALRecord::SetCaptureDeviceName, this,    "SetCaptureDeviceName", mtsStdString());
         provided->AddCommandWrite(&mtsOpenALRecord::SetCaptureDeviceID, this,      "SetCaptureDeviceID", mtsUInt());
-        provided->AddCommandRead(&mtsOpenALRecord::GetCaptureDeviceNames,this,     "GetCaptureDeviceNames", mtsStdStringVecProxy());
+        provided->AddCommandRead(&mtsOpenALRecord::GetCaptureDeviceNames,this,     "GetCaptureDeviceNames", mtsStdStringVec());
     }
 
     StreamVolume = 0;
@@ -353,7 +352,7 @@ void mtsOpenALRecord::GetFileName(mtsStdString & fileName) const
 
 
 
-void mtsOpenALRecord::GetCaptureDeviceNames(mtsStdStringVecProxy & names) const
+void mtsOpenALRecord::GetCaptureDeviceNames(mtsStdStringVec & names) const
 {
     // Get list of available Capture Devices
     const ALchar *pDeviceList = alcGetString(NULL, ALC_CAPTURE_DEVICE_SPECIFIER);
@@ -364,8 +363,8 @@ void mtsOpenALRecord::GetCaptureDeviceNames(mtsStdStringVecProxy & names) const
             while (*pDeviceList)
                 {
                     CMN_LOG_CLASS_RUN_VERBOSE << " - " << i++ << ": " << pDeviceList << std::endl;
-                    names.GetData().resize(i);
-                    names.GetData()[i-1]= std::string(pDeviceList);
+                    names.resize(i);
+                    names[i-1]= std::string(pDeviceList);
                     pDeviceList += strlen(pDeviceList) + 1;
                 }
         }

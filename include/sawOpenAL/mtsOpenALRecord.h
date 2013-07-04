@@ -7,8 +7,7 @@
   Author(s):  Marcin Balicki
   Created on: 2011
 
-  (C) Copyright 2011 Johns Hopkins University (JHU), All Rights
-  Reserved.
+  (C) Copyright 2011-2013 Johns Hopkins University (JHU), All Rights Reserved.
 
 --- begin cisst license - do not edit ---
 
@@ -27,6 +26,7 @@ http://www.cisst.org/cisst/license.txt.
 #include <alc.h>
 
 #include <cisstMultiTask/mtsTaskPeriodic.h>
+#include <cisstMultiTask/mtsVector.h>
 
 // forward declaration of header classes
 struct osaOpenALCAIHeader;
@@ -81,7 +81,7 @@ protected:
     //! /todo this needs checks to see if the device is being used?
     void SetCaptureDeviceName(const mtsStdString & deviceName);
     void SetCaptureDeviceID(const mtsUInt & deviceID);
-    void GetCaptureDeviceNames(mtsStdStringVecProxy & names) const;
+    void GetCaptureDeviceNames(mtsStdStringVec & names) const;
 
     void CalcStreamVolume(ALchar * stream, int numberOfSamples);
 
