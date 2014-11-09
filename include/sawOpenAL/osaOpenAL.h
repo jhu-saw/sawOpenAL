@@ -121,4 +121,4 @@ protected:
 
 CMN_DECLARE_SERVICES_INSTANTIATION(osaOpenAL);
 
-#endif
+#endif //_osaOpenAL_h

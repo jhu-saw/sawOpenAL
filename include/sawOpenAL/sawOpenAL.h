@@ -23,4 +23,4 @@ http://www.cisst.org/cisst/license.txt.
 #include <sawOpenAL/mtsOpenALPlay.h>
 #include <sawOpenAL/mtsOpenALRecord.h>
 
-#endif _sawOpenAL_h
+#endif //_sawOpenAL_h

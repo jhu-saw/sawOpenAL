@@ -23,4 +23,4 @@ http://www.cisst.org/cisst/license.txt.
 #include <sawOpenAL/mtsOpenALPlayQtComponent.h>
 #include <sawOpenAL/mtsOpenALRecordQtComponent.h>
 
-#endif _sawOpenALQt_h
+#endif //_sawOpenALQt_h
