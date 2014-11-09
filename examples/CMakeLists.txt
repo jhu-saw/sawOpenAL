@@ -12,7 +12,7 @@
 # --- end cisst license ---
 
 add_subdirectory (console)
-if (CISST_HAS_QT)
+if (CISST_HAS_QT4 OR CISST_HAS_QT5)
   add_subdirectory (Qt)
-endif (CISST_HAS_QT)
+endif (CISST_HAS_QT4 OR CISST_HAS_QT5)
 

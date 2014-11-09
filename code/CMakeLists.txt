@@ -57,27 +57,43 @@ if (cisst_FOUND_AS_REQUIRED)
     # for Qt generated header files
     include_directories (${CMAKE_CURRENT_BINARY_DIR}
                         "${sawOpenAL_SOURCE_DIR}/include")
-    
-    qt4_wrap_cpp (SAW_OPENAL_QT_COMPONENTS_GENERATED
-                  ${sawOpenAL_HEADER_DIR}/mtsOpenALPlayQtComponent.h
-                  ${sawOpenAL_HEADER_DIR}/mtsOpenALRecordQtComponent.h
-                  ${sawOpenAL_HEADER_DIR}/sawNoteRecorderQtComponent.h)
-    qt4_wrap_ui (SAW_OPENAL_QT_WIDGETS_GENERATED
-                 mtsOpenALPlayQtWidget.ui
-                 mtsOpenALRecordQtWidget.ui
-                 sawNoteRecorderQtWidget.ui)
+    if (CISST_HAS_QT4)    
+        qt4_wrap_cpp (SAW_OPENAL_QT_COMPONENTS_GENERATED
+                      ${sawOpenAL_HEADER_DIR}/mtsOpenALPlayQtComponent.h
+                      ${sawOpenAL_HEADER_DIR}/mtsOpenALRecordQtComponent.h
+                      ${sawOpenAL_HEADER_DIR}/sawNoteRecorderQtComponent.h)
+        qt4_wrap_ui (SAW_OPENAL_QT_WIDGETS_GENERATED
+                     mtsOpenALPlayQtWidget.ui
+                     mtsOpenALRecordQtWidget.ui
+                     sawNoteRecorderQtWidget.ui)
+
+    else (CISST_HAS_QT4)
+        # assumes Qt 5 Auto Moc
+        set (CMAKE_AUTOMOC ON)
+
+        qt5_wrap_cpp (SAW_OPENAL_QT_COMPONENTS_GENERATED
+                      ${sawOpenAL_HEADER_DIR}/mtsOpenALPlayQtComponent.h
+                      ${sawOpenAL_HEADER_DIR}/mtsOpenALRecordQtComponent.h
+                      ${sawOpenAL_HEADER_DIR}/sawNoteRecorderQtComponent.h)
+
+        qt5_wrap_ui (SAW_OPENAL_QT_WIDGETS_GENERATED
+                     mtsOpenALPlayQtWidget.ui
+                     mtsOpenALRecordQtWidget.ui
+                     sawNoteRecorderQtWidget.ui)
+    endif (CISST_HAS_QT4)
+
 
     add_library (sawOpenALQt
-                 ${SAW_OPENAL_QT_COMPONENTS_GENERATED}
-                 ${SAW_OPENAL_QT_WIDGETS_GENERATED}
-                 ${sawOpenAL_HEADER_DIR}/sawOpenALExportQt.h
-                 mtsOpenALPlayQtComponent.cpp
-                 ${sawOpenAL_HEADER_DIR}/mtsOpenALPlayQtComponent.h
-                 mtsOpenALRecordQtComponent.cpp
-                 ${sawOpenAL_HEADER_DIR}/mtsOpenALRecordQtComponent.h
-                 sawNoteRecorderQtComponent.cpp
-                 ${sawOpenAL_HEADER_DIR}/sawNoteRecorderQtComponent.h
-                )
+       ${sawOpenAL_HEADER_DIR}/sawOpenALExportQt.h
+       mtsOpenALPlayQtComponent.cpp
+       ${sawOpenAL_HEADER_DIR}/mtsOpenALPlayQtComponent.h
+       mtsOpenALRecordQtComponent.cpp
+       ${sawOpenAL_HEADER_DIR}/mtsOpenALRecordQtComponent.h
+       sawNoteRecorderQtComponent.cpp
+       ${sawOpenAL_HEADER_DIR}/sawNoteRecorderQtComponent.h
+       ${SAW_OPENAL_QT_COMPONENTS_GENERATED}
+       ${SAW_OPENAL_QT_WIDGETS_GENERATED}
+       )
 
     target_link_libraries (sawOpenALQt ${QT_LIBRARIES})
     cisst_target_link_libraries (sawOpenALQt ${REQUIRED_CISST_LIBRARIES} cisstVectorQt cisstQt)
